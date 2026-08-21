@@ -13,7 +13,7 @@ import { NewGroupModal } from "@/components/chat/NewGroupModal";
 import { GroupInfoDrawer } from "@/components/chat/GroupInfoDrawer";
 import { User, Conversation, GroupConversation } from "@/types";
 import { api } from "@/lib/api";
-import { Loader2, MessageSquare, Users, Sparkles, BookOpen } from "lucide-react";
+import { Loader2, MessageSquare, Users, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -170,7 +170,7 @@ export default function ChatPage() {
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center select-none">
             <div className="relative mb-6">
               <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-primary via-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-2xl shadow-primary/30 animate-pulse-glow">
-                <Sparkles className="w-10 h-10" />
+                <MessageSquare className="w-10 h-10" />
               </div>
             </div>
 

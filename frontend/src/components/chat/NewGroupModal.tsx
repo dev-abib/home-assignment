@@ -39,17 +39,16 @@ export function NewGroupModal({
     }
   }, [isOpen]);
 
-  // Debounced search
+  // Load directory and filter
   useEffect(() => {
-    if (!isOpen || !searchQuery.trim()) {
-      setSearchResults([]);
-      setIsLoadingUsers(false);
-      return;
-    }
+    if (!isOpen) return;
+
+    let isMounted = true;
+    setIsLoadingUsers(true);
 
     const timer = setTimeout(async () => {
-      setIsLoadingUsers(true);
       const res = await api.searchUsers(searchQuery.trim());
+      if (!isMounted) return;
       if (res.data) {
         // Filter out current user and already selected users
         const filtered = res.data.filter(
@@ -60,9 +59,12 @@ export function NewGroupModal({
         setSearchResults([]);
       }
       setIsLoadingUsers(false);
-    }, 280);
+    }, searchQuery.trim() ? 250 : 0);
 
-    return () => clearTimeout(timer);
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, [searchQuery, isOpen, currentUserId, selectedUsers]);
 
   const handleSelectUser = (user: User) => {
@@ -197,38 +199,36 @@ export function NewGroupModal({
           </div>
 
           {/* Search Dropdown / Results */}
-          {searchQuery.trim() && (
-            <div className="mt-2 max-h-40 overflow-y-auto rounded-xl bg-card border border-border p-1 space-y-1 shadow-lg">
-              {isLoadingUsers ? (
-                <div className="flex items-center justify-center p-3 text-muted-foreground gap-2 text-xs">
-                  <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                  <span>Searching...</span>
-                </div>
-              ) : searchResults.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center p-3">No matching users</p>
-              ) : (
-                searchResults.map((user) => (
-                  <button
-                    key={user._id}
-                    type="button"
-                    onClick={() => handleSelectUser(user)}
-                    className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-secondary text-left transition-colors group"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Avatar name={user.name} size="sm" />
-                      <div>
-                        <p className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">
-                          {user.name}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">{user.phone}</p>
-                      </div>
+          <div className="mt-2 max-h-40 overflow-y-auto rounded-xl bg-card border border-border p-1 space-y-1 shadow-lg">
+            {isLoadingUsers ? (
+              <div className="flex items-center justify-center p-3 text-muted-foreground gap-2 text-xs">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                <span>Searching directory...</span>
+              </div>
+            ) : searchResults.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center p-3">No matching users</p>
+            ) : (
+              searchResults.map((user) => (
+                <button
+                  key={user._id}
+                  type="button"
+                  onClick={() => handleSelectUser(user)}
+                  className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-secondary text-left transition-colors group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Avatar name={user.name} size="sm" />
+                    <div>
+                      <p className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {user.name}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">{user.phone}</p>
                     </div>
-                    <Check className="w-4 h-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </button>
-                ))
-              )}
-            </div>
-          )}
+                  </div>
+                  <Check className="w-4 h-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              ))
+            )}
+          </div>
         </div>
 
         {/* Footer Actions */}

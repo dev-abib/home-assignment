@@ -84,11 +84,60 @@ class ApiClient {
   }
 
   // --- Users ---
-  async searchUsers(query: string): Promise<{ data: User[] | null; error: string | null }> {
-    const res = await this.request<User[]>(`/users/search?q=${encodeURIComponent(query)}`, {
+  async searchUsers(query: string = ""): Promise<{ data: User[] | null; error: string | null }> {
+    const trimmed = (query || "").trim();
+    const safeQuery = trimmed.replace(/^\+/, "");
+
+    // 1. Attempt primary backend search
+    const res = await this.request<User[]>(`/users/search?q=${encodeURIComponent(safeQuery)}`, {
       method: "GET",
     });
-    return { data: res.data, error: res.error };
+
+    let users: User[] = Array.isArray(res.data) ? res.data : [];
+
+    // 2. Fetch full directory if searching by phone or if direct query had 0 results or failed
+    // (Render backend only searches name with regex and fails on '+' or misses phone numbers)
+    try {
+      const dirRes = await this.request<User[]>("/users/search?q=", { method: "GET" });
+      if (Array.isArray(dirRes.data) && dirRes.data.length > 0) {
+        const userMap = new Map<string, User>();
+        // Add direct results first
+        users.forEach((u) => u && u._id && userMap.set(u._id, u));
+
+        if (!trimmed) {
+          // If query is empty, return all directory contacts
+          dirRes.data.forEach((u) => u && u._id && userMap.set(u._id, u));
+        } else {
+          const lowerQuery = trimmed.toLowerCase();
+          const cleanQuery = lowerQuery.replace(/[^a-z0-9]/g, "");
+          const digitsOnly = trimmed.replace(/\D/g, "");
+
+          dirRes.data.forEach((u) => {
+            if (!u || !u._id) return;
+            const uName = (u.name || "").toLowerCase();
+            const uCleanName = uName.replace(/[^a-z0-9]/g, "");
+            const uPhone = (u.phone || "").toLowerCase();
+            const uDigits = (u.phone || "").replace(/\D/g, "");
+
+            const matchName =
+              uName.includes(lowerQuery) || (cleanQuery.length > 0 && uCleanName.includes(cleanQuery));
+            const matchPhone =
+              uPhone.includes(lowerQuery) ||
+              (digitsOnly.length > 0 && uDigits.includes(digitsOnly)) ||
+              (digitsOnly.length >= 3 && uDigits.endsWith(digitsOnly));
+
+            if (matchName || matchPhone) {
+              userMap.set(u._id, u);
+            }
+          });
+        }
+        users = Array.from(userMap.values());
+      }
+    } catch {
+      // Fallback to primary results
+    }
+
+    return { data: users, error: null };
   }
 
   // --- Conversations ---

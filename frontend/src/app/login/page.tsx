@@ -3,15 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { Sparkles, Phone, User, ArrowRight, Loader2, ShieldCheck, Zap, Lock, MessageSquare } from "lucide-react";
+import { Phone, User, ArrowRight, Loader2, MessageSquare, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-
-const DEMO_ACCOUNTS = [
-  { name: "Alex Rivera", phone: "+15551002001", role: "Engineering Lead" },
-  { name: "Taylor Swift", phone: "+15551002002", role: "Product Designer" },
-  { name: "Jordan Lee", phone: "+15551002003", role: "Frontend Developer" },
-];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -48,22 +42,6 @@ export default function LoginPage() {
     setIsSubmitting(false);
   };
 
-  const handleQuickLogin = async (demoName: string, demoPhone: string) => {
-    setName(demoName);
-    setPhone(demoPhone);
-    setIsSubmitting(true);
-    setError(null);
-
-    const result = await login(demoPhone, demoName);
-    if (result.success) {
-      toast.success(`Logged in as ${demoName}!`);
-      router.push("/chat");
-    } else {
-      setError(result.error || "Failed to log in");
-    }
-    setIsSubmitting(false);
-  };
-
   if (isAuthLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -82,7 +60,7 @@ export default function LoginPage() {
       <header className="flex items-center justify-between max-w-6xl mx-auto w-full z-10">
         <Link href="/" className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-primary/25">
-            <Sparkles className="w-5 h-5" />
+            <MessageSquare className="w-5 h-5" />
           </div>
           <span className="text-base font-bold text-foreground tracking-tight">PulseChat</span>
         </Link>
@@ -114,7 +92,7 @@ export default function LoginPage() {
               Sign In to PulseChat
             </h1>
             <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">
-              Enter your phone and name. If your number is new, you will be registered automatically.
+              Enter your phone and name. If your number is new, your account will be registered automatically.
             </p>
           </div>
 
@@ -184,36 +162,11 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Quick Demo Switchers */}
-          <div className="mt-8 pt-6 border-t border-border/60">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-amber-400" />
-                <span>1-Click Reviewer Personas</span>
-              </span>
-            </div>
-
-            <div className="space-y-1.5">
-              {DEMO_ACCOUNTS.map((acc) => (
-                <button
-                  key={acc.phone}
-                  type="button"
-                  onClick={() => handleQuickLogin(acc.name, acc.phone)}
-                  disabled={isSubmitting}
-                  className="w-full flex items-center justify-between p-2 rounded-xl bg-secondary/40 hover:bg-secondary/80 border border-border/40 text-left transition-all group"
-                >
-                  <div className="truncate">
-                    <p className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">
-                      {acc.name}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground font-mono">{acc.phone}</p>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 shrink-0 font-medium">
-                    {acc.role}
-                  </span>
-                </button>
-              ))}
-            </div>
+          <div className="mt-6 pt-4 border-t border-border/50 text-center">
+            <p className="text-[11px] text-muted-foreground flex items-center justify-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Zero-friction automatic registration enabled</span>
+            </p>
           </div>
         </div>
       </main>

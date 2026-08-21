@@ -5,7 +5,7 @@ import { Message, User, Conversation, GroupConversation } from "@/types";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import { formatDateSeparator } from "@/lib/utils";
 import { useSmartScroll } from "@/hooks/useSmartScroll";
-import { ChevronDown, Loader2, MessageSquare, Sparkles } from "lucide-react";
+import { ChevronDown, Loader2, MessageSquare } from "lucide-react";
 
 interface MessageListProps {
   messages: Message[];
@@ -90,7 +90,7 @@ export function MessageList({
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-muted-foreground">
         <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-primary/20 via-indigo-500/10 to-purple-500/20 flex items-center justify-center text-primary mb-3 shadow-inner border border-primary/20 animate-pulse-glow">
-          <Sparkles className="w-8 h-8" />
+          <MessageSquare className="w-8 h-8" />
         </div>
         <h3 className="text-sm font-semibold text-foreground">No messages yet</h3>
         <p className="text-xs text-muted-foreground max-w-xs mt-1">

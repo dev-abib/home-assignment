@@ -37,13 +37,21 @@ export function ChatHeader({
   const groupConv = isGroup ? (conversation as GroupConversation) : null;
   const directConv = !isGroup ? (conversation as DirectConversation) : null;
 
+  let otherUser = directConv?.participant;
+  if (!otherUser && Array.isArray(directConv?.participants)) {
+    const found = directConv.participants.find(
+      (p) => typeof p === "object" && p !== null
+    );
+    if (found && typeof found === "object") otherUser = found as any;
+  }
+
   const name = isGroup
     ? groupConv?.name || "Group Chat"
-    : directConv?.participant?.name || "Direct Chat";
+    : otherUser?.name || directConv?.participant?.name || "Direct Chat";
 
   const subtitle = isGroup
     ? `${groupConv?.participants?.length || 0} participants`
-    : directConv?.participant?.phone || "1-to-1 conversation";
+    : otherUser?.phone || directConv?.participant?.phone || "1-to-1 conversation";
 
   const handleCallDemo = () => {
     toast.info("Audio call feature simulated — active direct session");

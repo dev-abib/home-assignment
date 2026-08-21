@@ -16,7 +16,7 @@ import {
   Sun,
   Moon,
   LogOut,
-  Sparkles,
+  MessageSquare,
   Radio,
 } from "lucide-react";
 
@@ -63,7 +63,16 @@ export function ConversationSidebar({
       );
     } else {
       const direct = c as DirectConversation;
+      let otherUser = direct.participant;
+      if (!otherUser && Array.isArray(direct.participants)) {
+        const found = direct.participants.find(
+          (p) => typeof p === "object" && p !== null && (p as User)._id !== currentUser?._id
+        );
+        if (found && typeof found === "object") otherUser = found as User;
+      }
       return (
+        otherUser?.name?.toLowerCase().includes(query) ||
+        otherUser?.phone?.toLowerCase().includes(query) ||
         direct.participant?.name?.toLowerCase().includes(query) ||
         direct.participant?.phone?.toLowerCase().includes(query)
       );
@@ -77,7 +86,7 @@ export function ConversationSidebar({
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-primary to-indigo-500 flex items-center justify-center text-white shadow-md shadow-primary/25">
-              <Sparkles className="w-4 h-4" />
+              <MessageSquare className="w-4 h-4" />
             </div>
             <div>
               <h1 className="text-sm font-bold tracking-tight text-foreground">PulseChat</h1>
@@ -198,11 +207,19 @@ export function ConversationSidebar({
             const groupConv = isGroup ? (conv as GroupConversation) : null;
             const directConv = !isGroup ? (conv as DirectConversation) : null;
 
+            let otherUser = directConv?.participant;
+            if (!otherUser && Array.isArray(directConv?.participants)) {
+              const found = directConv.participants.find(
+                (p) => typeof p === "object" && p !== null && (p as User)._id !== currentUser?._id
+              );
+              if (found && typeof found === "object") otherUser = found as User;
+            }
+
             const name = isGroup
               ? groupConv?.name || "Unnamed Group"
-              : directConv?.participant?.name || "Unknown User";
+              : otherUser?.name || directConv?.participant?.name || "Direct Chat";
 
-            const phone = !isGroup ? directConv?.participant?.phone : null;
+            const phone = !isGroup ? otherUser?.phone || directConv?.participant?.phone : null;
             const isSelected = activeConversationId === conv._id;
             const unread = conv.unreadCount || 0;
 

@@ -25,7 +25,7 @@ export function NewConversationModal({
   const [isLoading, setIsLoading] = useState(false);
   const [isStarting, setIsStarting] = useState<string | null>(null);
 
-  // Debounced search
+  // Load directory on open and filter on search
   useEffect(() => {
     if (!isOpen) {
       setSearchQuery("");
@@ -33,15 +33,12 @@ export function NewConversationModal({
       return;
     }
 
-    if (!searchQuery.trim()) {
-      setResults([]);
-      setIsLoading(false);
-      return;
-    }
+    let isMounted = true;
+    setIsLoading(true);
 
     const timer = setTimeout(async () => {
-      setIsLoading(true);
       const res = await api.searchUsers(searchQuery.trim());
+      if (!isMounted) return;
       if (res.data) {
         // Exclude current user from search results
         const filtered = res.data.filter((u) => u._id !== currentUserId);
@@ -50,9 +47,12 @@ export function NewConversationModal({
         setResults([]);
       }
       setIsLoading(false);
-    }, 280);
+    }, searchQuery.trim() ? 250 : 0);
 
-    return () => clearTimeout(timer);
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, [searchQuery, isOpen, currentUserId]);
 
   const handleStart = async (user: User) => {
@@ -70,7 +70,7 @@ export function NewConversationModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Start New Conversation"
-      description="Search for users by their name or phone number."
+      description="Search for registered users by their name or phone number."
     >
       <div className="space-y-4">
         <div className="relative">
@@ -91,19 +91,12 @@ export function NewConversationModal({
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
               <span className="text-xs">Searching directory...</span>
             </div>
-          ) : searchQuery.trim() && results.length === 0 ? (
+          ) : results.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-44 text-muted-foreground text-center p-4">
               <Phone className="w-8 h-8 opacity-40 mb-2" />
               <p className="text-sm font-medium text-foreground">No users found</p>
               <p className="text-xs text-muted-foreground mt-1">
                 Try searching with a different name or phone number
-              </p>
-            </div>
-          ) : !searchQuery.trim() ? (
-            <div className="flex flex-col items-center justify-center h-44 text-muted-foreground text-center p-4">
-              <Search className="w-8 h-8 opacity-30 mb-2 text-primary" />
-              <p className="text-xs text-muted-foreground">
-                Type at least 1 character to search for contacts
               </p>
             </div>
           ) : (

@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
-  Sparkles,
   ArrowRight,
   Zap,
   ShieldCheck,
@@ -150,7 +149,7 @@ export default function LandingPage() {
       <nav className="h-20 max-w-7xl mx-auto px-6 flex items-center justify-between relative z-20">
         <Link href="/" className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-primary to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-primary/30">
-            <Sparkles className="w-5 h-5" />
+            <MessageSquare className="w-5 h-5" />
           </div>
           <span className="text-lg font-extrabold tracking-tight text-foreground">
             PulseChat<span className="text-primary">.</span>
@@ -218,7 +217,7 @@ export default function LandingPage() {
             onClick={triggerConfetti}
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-primary via-indigo-600 to-purple-600 hover:from-primary-hover hover:to-purple-700 text-white text-sm font-bold shadow-xl shadow-primary/30 transition-all hover:scale-105 active:scale-95"
           >
-            <Sparkles className="w-4 h-4" />
+            <MessageSquare className="w-4 h-4" />
             <span>Open Chat Workspace</span>
           </Link>
 
@@ -511,7 +510,7 @@ export default function LandingPage() {
       <footer className="relative z-10 max-w-7xl mx-auto px-6 py-12 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-lg bg-primary text-white flex items-center justify-center">
-            <Sparkles className="w-3.5 h-3.5" />
+            <MessageSquare className="w-3.5 h-3.5" />
           </div>
           <span className="font-bold text-foreground">PulseChat Platform</span>
           <span>· Candidate Assignment Deliverable</span>
