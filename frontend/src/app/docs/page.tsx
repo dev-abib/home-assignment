@@ -311,7 +311,18 @@ export default function DocsPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <a
+            href="/openapi.json"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-xs font-semibold text-foreground transition-all"
+            title="Download OpenAPI / Swagger 3.0 JSON specification"
+          >
+            <Layers className="w-3.5 h-3.5 text-primary" />
+            <span>OpenAPI / Swagger JSON</span>
+          </a>
+
           <Link
             href="/chat"
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary-hover transition-all"

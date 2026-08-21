@@ -1,0 +1,561 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "PulseChat Platform API Specification",
+    "description": "Comprehensive REST and WebSocket API specification for the PulseChat real-time messaging platform. Designed for seamless 1-to-1 conversations, multi-user groups, and real-time synchronization.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "PulseChat Engineering Team"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://frontend-task-chatapp.onrender.com",
+      "description": "Production Render Server"
+    },
+    {
+      "url": "http://localhost:5000",
+      "description": "Local Express + MongoDB Development Server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Provide JWT token obtained from POST /api/auth/login"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "required": ["_id", "name", "phone"],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6a8883d9e5d6aac97523781a"
+          },
+          "name": {
+            "type": "string",
+            "example": "Ada Lovelace"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+15551234567"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-08-21T16:59:05.368Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Message": {
+        "type": "object",
+        "required": ["_id", "conversation", "sender", "text", "createdAt"],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6a8883dce5d6aac97523783f"
+          },
+          "conversation": {
+            "type": "string",
+            "example": "6a8883dbe5d6aac975237832"
+          },
+          "sender": {
+            "type": "string",
+            "example": "6a8883d9e5d6aac97523781a"
+          },
+          "text": {
+            "type": "string",
+            "example": "Hello, world!"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-08-21T16:59:08.352Z"
+          }
+        }
+      },
+      "DirectConversation": {
+        "type": "object",
+        "required": ["_id", "type", "participants"],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6a8883dbe5d6aac975237832"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["direct"],
+            "example": "direct"
+          },
+          "participants": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "participant": {
+            "$ref": "#/components/schemas/User"
+          },
+          "lastMessage": {
+            "type": "object",
+            "properties": {
+              "text": { "type": "string" },
+              "sender": { "type": "string" },
+              "createdAt": { "type": "string", "format": "date-time" }
+            }
+          },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "GroupConversation": {
+        "type": "object",
+        "required": ["_id", "type", "name", "createdBy", "admins", "participants"],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6a8883dfe5d6aac97523786b"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["group"],
+            "example": "group"
+          },
+          "name": {
+            "type": "string",
+            "example": "Design & Frontend Squad"
+          },
+          "createdBy": {
+            "type": "string",
+            "example": "6a8883d9e5d6aac97523781a"
+          },
+          "admins": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "participants": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/User" }
+          },
+          "lastMessage": {
+            "type": "object",
+            "properties": {
+              "text": { "type": "string" },
+              "sender": { "type": "string" },
+              "createdAt": { "type": "string", "format": "date-time" }
+            }
+          },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": ["message", "code"],
+            "properties": {
+              "message": { "type": "string", "example": "Validation failed" },
+              "code": { "type": "string", "example": "VALIDATION_ERROR" },
+              "details": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": { "type": "string" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Verifies server connectivity and database connection status.",
+        "tags": ["System"],
+        "responses": {
+          "200": {
+            "description": "Server is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "ok" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Log in or Auto-Register",
+        "description": "Authenticates an existing user or creates a new account if the phone number is new.",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["phone", "name"],
+                "properties": {
+                  "phone": { "type": "string", "example": "+15551234567" },
+                  "name": { "type": "string", "example": "Ada Lovelace" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string" },
+                    "user": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "summary": "Get Current Profile",
+        "description": "Returns profile information for the authenticated token.",
+        "tags": ["Authentication"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Current user profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized / Invalid token"
+          }
+        }
+      }
+    },
+    "/api/users/search": {
+      "get": {
+        "summary": "Search Users",
+        "description": "Finds users by substring matching name or phone number.",
+        "tags": ["Users"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Search query substring (e.g. 'Ada' or '+1555')"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of matching users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/User" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/conversations": {
+      "get": {
+        "summary": "List Conversations",
+        "description": "Lists all 1-to-1 and group conversations the user belongs to.",
+        "tags": ["Conversations"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of conversations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "oneOf": [
+                          { "$ref": "#/components/schemas/DirectConversation" },
+                          { "$ref": "#/components/schemas/GroupConversation" }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Start Direct Conversation",
+        "description": "Opens or starts a 1-to-1 conversation with a specified user.",
+        "tags": ["Conversations"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["userId"],
+                "properties": {
+                  "userId": { "type": "string", "example": "6a8883dae5d6aac975237825" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Conversation opened" },
+          "201": { "description": "New conversation created" }
+        }
+      }
+    },
+    "/api/conversations/group": {
+      "post": {
+        "summary": "Create Group Conversation",
+        "description": "Creates a new multi-member room. Requires at least 3 members total (at least 2 IDs in participantIds).",
+        "tags": ["Groups"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "participantIds"],
+                "properties": {
+                  "name": { "type": "string", "example": "Design & Frontend Squad" },
+                  "participantIds": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "example": ["6a8883dae5d6aac975237825", "6a8883dee5d6aac975237859"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Group created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GroupConversation" }
+              }
+            }
+          },
+          "400": { "description": "Group size < 3 validation error" }
+        }
+      }
+    },
+    "/api/conversations/{id}": {
+      "patch": {
+        "summary": "Rename Group",
+        "description": "Renames an existing group (Admins only).",
+        "tags": ["Groups"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": { "name": { "type": "string", "example": "New Squad Name" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Group renamed successfully" }
+        }
+      }
+    },
+    "/api/conversations/{id}/admins": {
+      "post": {
+        "summary": "Promote Member to Admin",
+        "description": "Grants admin privileges to an existing group participant (Admins only).",
+        "tags": ["Groups"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["userId"],
+                "properties": { "userId": { "type": "string" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Member promoted to admin" }
+        }
+      }
+    },
+    "/api/conversations/{id}/participants": {
+      "post": {
+        "summary": "Add Members to Group",
+        "description": "Adds one or more users to a group (Admins only).",
+        "tags": ["Groups"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["userIds"],
+                "properties": {
+                  "userIds": { "type": "array", "items": { "type": "string" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Members added successfully" }
+        }
+      }
+    },
+    "/api/conversations/{id}/participants/{userId}": {
+      "delete": {
+        "summary": "Remove Member or Leave Group",
+        "description": "Removes a member from a group (Admins only) or allows the authenticated user to leave.",
+        "tags": ["Groups"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "userId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Participant removed / Left group" }
+        }
+      }
+    },
+    "/api/conversations/{id}/messages": {
+      "get": {
+        "summary": "Get Conversation Messages",
+        "description": "Retrieves chronological message history with cursor-based pagination.",
+        "tags": ["Messages"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "default": 20 } },
+          { "name": "before", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Cursor message ObjectID" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Messages retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "messages": { "type": "array", "items": { "$ref": "#/components/schemas/Message" } },
+                    "hasMore": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/messages": {
+      "post": {
+        "summary": "Send Message",
+        "description": "Sends a message to a direct or group conversation. Real-time broadcasted over Socket.io.",
+        "tags": ["Messages"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["conversationId", "text"],
+                "properties": {
+                  "conversationId": { "type": "string" },
+                  "text": { "type": "string", "example": "Hello, world!" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Message sent",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Message" }
+              }
+            }
+          },
+          "400": { "description": "Empty message validation error" }
+        }
+      }
+    }
+  }
+}
