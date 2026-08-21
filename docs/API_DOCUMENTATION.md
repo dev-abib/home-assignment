@@ -3,7 +3,7 @@
 > **Version:** 1.0.0  
 > **Base REST URL:** `https://frontend-task-chatapp.onrender.com/api`  
 > **WebSocket URL:** `https://frontend-task-chatapp.onrender.com` (Socket.io)  
-> **Author:** Frontend Candidate Specification Deliverable  
+> **Author:** Md. Abib Ahmed Dipto (Frontend Candidate Deliverable)  
 
 ---
 

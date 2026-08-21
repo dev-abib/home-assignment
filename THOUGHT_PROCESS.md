@@ -1,5 +1,9 @@
 # Part 3: Thought Process & Architectural Write-up
 
+> **Candidate:** Md. Abib Ahmed Dipto  
+> **Repository:** https://github.com/dev-abib/home-assignment  
+> **Live Demo:** https://home-assignment-smoky.vercel.app/  
+
 This document details the architectural decisions, design philosophies, AI tooling transparency, future extensions, and live API quirks encountered during the implementation of the **PulseChat Platform** (Parts 1 & 2).
 
 ---

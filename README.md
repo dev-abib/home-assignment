@@ -1,5 +1,6 @@
 # PulseChat — Real-Time Messaging Platform
 
+> **Candidate:** Md. Abib Ahmed Dipto  
 > **Frontend Developer Take-Home Assignment Deliverable**  
 > Complete implementation for **Part 1** (API Documentation & Chat Application), **Part 2** (Creative Landing Page with Live Simulator), and **Part 3** (Thought Process & Architecture Write-up), plus a **Full TypeScript + Express + MongoDB Atlas Backend**.
 
