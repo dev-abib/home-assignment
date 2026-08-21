@@ -5,27 +5,28 @@
 
 ---
 
-## 🌟 Quick Links & Live Demos
+## 🌟 Live Hosted URLs & Demos
 
-| Deliverable | URL / File Path | Description |
+| Deliverable | Live Production URL | Description |
 | :--- | :--- | :--- |
-| **Part 2 — Creative Landing Page** | `http://localhost:3000/` | Showcase page with an **embedded 2-user live simulator sandbox** |
-| **Part 1 — Chat Application** | `http://localhost:3000/chat` | Full 1-to-1 & group chat with smart auto-scroll & deduplication |
-| **Part 1 — Login / Auto-Register** | `http://localhost:3000/login` | Phone + name auto-registration & 1-click test personas |
-| **Part 1 — Interactive API Explorer** | `http://localhost:3000/docs` | In-app API test console with real server requests & cURL generator |
+| **Part 2 — Creative Landing Page** | [**`https://home-assignment-smoky.vercel.app/`**](https://home-assignment-smoky.vercel.app/) | Showcase page with an **embedded 2-user live simulator sandbox** |
+| **Part 1 — Chat Application** | [**`https://home-assignment-smoky.vercel.app/chat`**](https://home-assignment-smoky.vercel.app/chat) | Full 1-to-1 & group chat with smart auto-scroll & Web Audio chimes |
+| **Part 1 — Login / Auto-Register** | [**`https://home-assignment-smoky.vercel.app/login`**](https://home-assignment-smoky.vercel.app/login) | Phone + name auto-registration & 1-click test personas |
+| **Part 1 — Interactive API Explorer** | [**`https://home-assignment-smoky.vercel.app/docs`**](https://home-assignment-smoky.vercel.app/docs) | In-app API test console with real server requests & cURL generator |
+| **Part 1 — OpenAPI 3.0 / Swagger JSON** | [**`https://home-assignment-smoky.vercel.app/openapi.json`**](https://home-assignment-smoky.vercel.app/openapi.json) | Downloadable standard OpenAPI 3.0 / Swagger JSON spec |
 | **Part 1 — Standalone API Docs** | [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md) | Formal specification of all REST & WebSocket endpoints |
 | **Part 3 — Thought Process Write-up** | [`THOUGHT_PROCESS.md`](./THOUGHT_PROCESS.md) | Architectural rationale, AI transparency, and live API quirks |
+| **Live Cloud Backend (Render)** | [`https://frontend-task-chatapp.onrender.com`](https://frontend-task-chatapp.onrender.com) | Express + Socket.io + MongoDB Atlas production server |
+| **GitHub Repository** | [`https://github.com/dev-abib/home-assignment`](https://github.com/dev-abib/home-assignment) | Complete clean fullstack source code |
 
 ---
 
 ## 🏗️ Clean Project Architecture & Structure
 
-The repository is organized into distinct, modular folders:
-
 ```
 e:\task/
 │
-├── 📂 frontend/                    # FRONTEND APPLICATION (Next.js 14 + Tailwind v4 + Socket.io)
+├── 📂 frontend/                    # DEDICATED NEXT.JS 14 FRONTEND APPLICATION
 │   ├── 📂 src/
 │   │   ├── 📂 app/
 │   │   │   ├── 📄 page.tsx         # Part 2: Landing Page + Live Simulator Sandbox
@@ -40,11 +41,14 @@ e:\task/
 │   │   ├── 📂 lib/                 # api.ts (REST client), socket.ts, sound.ts (Web Audio chimes)
 │   │   ├── 📂 context/             # AuthContext, ThemeContext
 │   │   └── 📂 types/               # TypeScript interfaces
+│   ├── 📂 public/
+│   │   └── 📄 openapi.json         # Static OpenAPI 3.0 / Swagger specification
 │   ├── 📄 package.json             # Frontend package configuration (Tailwind v4, Next 14)
 │   ├── 📄 tsconfig.json            # Frontend TypeScript configuration
+│   ├── 📄 next.config.mjs          # Next.js configuration
 │   └── 📄 postcss.config.mjs       # PostCSS Tailwind v4 configuration
 │
-├── 📂 backend/                     # BACKEND APPLICATION (Express + TypeScript + Socket.io + MongoDB)
+├── 📂 backend/                     # DEDICATED EXPRESS + TYPESCRIPT BACKEND
 │   ├── 📂 src/
 │   │   ├── 📂 models/              # User, Conversation, Message (Mongoose)
 │   │   ├── 📂 controllers/         # Auth, User, Conversation, Message controllers
@@ -58,7 +62,8 @@ e:\task/
 │
 ├── 📂 docs/                        # DOCUMENTATION DIRECTORY
 │   ├── 📄 API_DOCUMENTATION.md     # Standalone API documentation for all endpoints
-│   └── 📄 THOUGHT_PROCESS.md       # In-depth architectural write-up and API analysis
+│   ├── 📄 THOUGHT_PROCESS.md       # In-depth architectural write-up and API analysis
+│   └── 📄 openapi.json             # Complete OpenAPI 3.0 / Swagger JSON specification
 │
 ├── 📂 scripts/                     # VERIFICATION & AUTOMATED TEST SUITE
 │   ├── 📄 start_dev.ps1            # Concurrent dev launcher
@@ -85,40 +90,14 @@ e:\task/
 ### 1-Command Startup (From Root Directory)
 
 ```bash
-# Install frontend dependencies
+# Install dependencies
 cd frontend && npm install && cd ..
 
 # Start Frontend Dev Server (Next.js at http://localhost:3000)
 npm run dev
 
-# Or build frontend for production
+# Build for production
 npm run build
-```
-
-### Option A: Run Both Frontend & Local Backend
-
-1. **Start the Backend Server (Express + Socket.io + MongoDB Atlas):**
-   ```bash
-   cd backend
-   npm install
-   npm run dev
-   ```
-   *The backend starts at `http://localhost:5000` with MongoDB Atlas connected.*
-
-2. **Start the Frontend Application (Next.js 14 + Tailwind v4):**
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-   *Open `http://localhost:3000` in your browser.*
-
-### Option B: Run Frontend Against Live Render Backend
-The frontend is pre-configured to connect seamlessly to the company's live Render backend at `https://frontend-task-chatapp.onrender.com`. Simply run:
-```bash
-cd frontend
-npm install
-npm run dev
 ```
 
 ---
@@ -126,7 +105,7 @@ npm run dev
 ## 🧪 Verified Features & Assignment Coverage
 
 ### Part 1: API Documentation & Feature Implementation
-- **Standalone API Docs:** Complete Markdown specification in [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md) and interactive playground at `/docs`.
+- **Standalone API Docs & Swagger:** Complete Markdown specification in [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md), interactive playground at `/docs`, and OpenAPI 3.0 JSON at [`/openapi.json`](https://home-assignment-smoky.vercel.app/openapi.json).
 - **Zero-Friction Auth:** Auto-registers new phone numbers or logs in existing numbers with JWT session recovery and 1-click test personas ("Alex Rivera", "Taylor Swift", "Jordan Lee").
 - **Direct & Group Conversations:** Real-time search (`/api/users/search`) and multi-user group creator enforcing the backend $\ge 3$ member rule.
 - **Group Governance Drawer:** Admin promotion (`POST /conversations/:id/admins`), participant addition, group rename, and member departure.
