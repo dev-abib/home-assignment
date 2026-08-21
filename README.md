@@ -12,7 +12,7 @@
 | :--- | :--- | :--- |
 | **Part 2 — Creative Landing Page** | [**`https://home-assignment-smoky.vercel.app/`**](https://home-assignment-smoky.vercel.app/) | Showcase page with an **embedded 2-user live simulator sandbox** |
 | **Part 1 — Chat Application** | [**`https://home-assignment-smoky.vercel.app/chat`**](https://home-assignment-smoky.vercel.app/chat) | Full 1-to-1 & group chat with smart auto-scroll & Web Audio chimes |
-| **Part 1 — Login / Auto-Register** | [**`https://home-assignment-smoky.vercel.app/login`**](https://home-assignment-smoky.vercel.app/login) | Phone + name auto-registration & 1-click test personas |
+| **Part 1 — Login / Auto-Register** | [**`https://home-assignment-smoky.vercel.app/login`**](https://home-assignment-smoky.vercel.app/login) | Phone + name auto-registration authentication |
 | **Part 1 — Interactive API Explorer** | [**`https://home-assignment-smoky.vercel.app/docs`**](https://home-assignment-smoky.vercel.app/docs) | In-app API test console with real server requests & cURL generator |
 | **Part 1 — OpenAPI 3.0 / Swagger JSON** | [**`https://home-assignment-smoky.vercel.app/openapi.json`**](https://home-assignment-smoky.vercel.app/openapi.json) | Downloadable standard OpenAPI 3.0 / Swagger JSON spec |
 | **Part 1 — Standalone API Docs** | [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md) | Formal specification of all REST & WebSocket endpoints |
@@ -32,8 +32,9 @@ e:\task/
 │   │   ├── 📂 app/
 │   │   │   ├── 📄 page.tsx         # Part 2: Landing Page + Live Simulator Sandbox
 │   │   │   ├── 📂 chat/page.tsx    # Part 1: Chat Application Panel
-│   │   │   ├── 📂 login/page.tsx   # Part 1: Auth Screen (Auto-Register + Personas)
+│   │   │   ├── 📂 login/page.tsx   # Part 1: Auth Screen (Phone + Name Auto-Registration)
 │   │   │   ├── 📂 docs/page.tsx    # Part 1: Interactive API Playground
+│   │   │   ├── 📂 openapi.json/    # Route handler for dynamic OpenAPI JSON spec
 │   │   │   ├── 📄 globals.css      # Tailwind v4 theme tokens & glassmorphic styling
 │   │   │   └── 📄 layout.tsx       # Auth & Dark/Light Theme Providers
 │   │   ├── 📂 components/chat/     # Sidebar, Header, MessageList, Bubble, Input, Modals, Drawer
@@ -65,13 +66,6 @@ e:\task/
 │   ├── 📄 API_DOCUMENTATION.md     # Standalone API documentation for all endpoints
 │   ├── 📄 THOUGHT_PROCESS.md       # In-depth architectural write-up and API analysis
 │   └── 📄 openapi.json             # Complete OpenAPI 3.0 / Swagger JSON specification
-│
-├── 📂 scripts/                     # VERIFICATION & AUTOMATED TEST SUITE
-│   ├── 📄 start_dev.ps1            # Concurrent dev launcher
-│   ├── 📄 test_e2e_flow.ps1        # Automated API lifecycle test suite
-│   ├── 📄 test_local_backend.ps1   # Local backend validation test
-│   ├── 📄 test_mongo.js            # MongoDB Atlas connectivity probe
-│   └── 📄 verify_build.ps1         # Production build verifier
 │
 ├── 📄 API_DOCUMENTATION.md         # Top-level standalone API specification
 ├── 📄 THOUGHT_PROCESS.md           # Top-level architectural write-up & API quirks
@@ -107,7 +101,7 @@ npm run build
 
 ### Part 1: API Documentation & Feature Implementation
 - **Standalone API Docs & Swagger:** Complete Markdown specification in [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md), interactive playground at `/docs`, and OpenAPI 3.0 JSON at [`/openapi.json`](https://home-assignment-smoky.vercel.app/openapi.json).
-- **Zero-Friction Auth:** Auto-registers new phone numbers or logs in existing numbers with JWT session recovery and 1-click test personas ("Alex Rivera", "Taylor Swift", "Jordan Lee").
+- **Zero-Friction Auth:** Auto-registers new phone numbers or logs in existing numbers with JWT session recovery.
 - **Direct & Group Conversations:** Real-time search (`/api/users/search`) and multi-user group creator enforcing the backend $\ge 3$ member rule.
 - **Group Governance Drawer:** Admin promotion (`POST /conversations/:id/admins`), participant addition, group rename, and member departure.
 - **Smart Auto-Scroll (`useSmartScroll`):** Auto-scrolls on new messages by default; preserves scroll position when viewing history and displays an animated **"↓ X new messages"** pill.
@@ -116,7 +110,7 @@ npm run build
 
 ### Part 2: Creative Landing Page
 - Modern glassmorphic aesthetic with dark/light mode toggle.
-- **Interactive 2-User Simulator Sandbox:** Playable multi-persona demo embedded directly on the landing page where visitors can test real-time chat latency and auto-replies before logging in.
+- **Interactive 2-User Simulator Sandbox:** Playable live demo embedded directly on the landing page where visitors can test real-time chat latency and auto-replies before logging in.
 - Architecture visualizer and feature deep-dives.
 
 ### Part 3: Thought Process & API Quirks
