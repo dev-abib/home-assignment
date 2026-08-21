@@ -1,0 +1,292 @@
+"use client";
+
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Conversation, Message, User } from "@/types";
+import { api } from "@/lib/api";
+import { socketService } from "@/lib/socket";
+import { sounds } from "@/lib/sound";
+
+interface UseChatProps {
+  currentUser: User | null;
+}
+
+export function useChat({ currentUser }: UseChatProps) {
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoadingConversations, setIsLoadingConversations] = useState<boolean>(true);
+  const [isLoadingMessages, setIsLoadingMessages] = useState<boolean>(false);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [socketStatus, setSocketStatus] = useState<"connected" | "connecting" | "disconnected">("disconnected");
+  const [error, setError] = useState<string | null>(null);
+
+  const activeConvRef = useRef<string | null>(null);
+  activeConvRef.current = activeConversationId;
+
+  // Active conversation object
+  const activeConversation = conversations.find((c) => c._id === activeConversationId) || null;
+
+  // 1. Fetch conversations list
+  const fetchConversations = useCallback(async () => {
+    setIsLoadingConversations(true);
+    setError(null);
+    const res = await api.getConversations();
+    if (res.data) {
+      // Sort conversations by updatedAt descending
+      const sorted = [...res.data].sort((a, b) => {
+        const timeA = new Date(a.updatedAt || a.createdAt || 0).getTime();
+        const timeB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+        return timeB - timeA;
+      });
+      setConversations(sorted);
+    } else {
+      setError(res.error || "Failed to load conversations");
+    }
+    setIsLoadingConversations(false);
+  }, []);
+
+  // 2. Load messages for active conversation
+  const loadMessages = useCallback(async (conversationId: string) => {
+    setIsLoadingMessages(true);
+    setMessages([]);
+    setHasMore(false);
+
+    const res = await api.getMessages(conversationId, { limit: 30 });
+    if (res.data) {
+      // API returns messages in descending order (newest first). Reverse to ascending (oldest first).
+      const sorted = [...res.data.messages].reverse();
+      // Deduplicate by _id
+      const uniqueMessages = Array.from(new Map(sorted.map((m) => [m._id, m])).values());
+      setMessages(uniqueMessages);
+      setHasMore(res.data.hasMore);
+    } else {
+      setError(res.error || "Failed to load messages");
+    }
+    setIsLoadingMessages(false);
+  }, []);
+
+  // 3. Load older messages (pagination)
+  const loadOlderMessages = useCallback(async () => {
+    if (!activeConversationId || isLoadingMore || !hasMore || messages.length === 0) return;
+
+    setIsLoadingMore(true);
+    const oldestMessage = messages[0];
+    const beforeId = oldestMessage._id;
+
+    const res = await api.getMessages(activeConversationId, { limit: 20, before: beforeId });
+    if (res.data) {
+      const olderMessages = [...res.data.messages].reverse();
+
+      // Deduplicate against existing messages
+      setMessages((prev) => {
+        const existingIds = new Set(prev.map((m) => m._id));
+        const newUnique = olderMessages.filter((m) => !existingIds.has(m._id));
+        return [...newUnique, ...prev];
+      });
+
+      setHasMore(res.data.hasMore);
+    }
+    setIsLoadingMore(false);
+  }, [activeConversationId, hasMore, isLoadingMore, messages]);
+
+  // 4. Send a message
+  const sendMessage = useCallback(
+    async (text: string): Promise<boolean> => {
+      const trimmed = text.trim();
+      if (!trimmed || !activeConversationId || !currentUser) return false;
+
+      const tempId = `temp_${Date.now()}_${Math.random()}`;
+      const optimisticMsg: Message = {
+        _id: tempId,
+        conversation: activeConversationId,
+        sender: currentUser._id,
+        text: trimmed,
+        createdAt: new Date().toISOString(),
+        status: "sending",
+        tempId,
+      };
+
+      // Add to messages immediately (optimistic UI)
+      setMessages((prev) => [...prev, optimisticMsg]);
+      sounds.playSend();
+
+      // Update conversation list lastMessage preview
+      setConversations((prev) =>
+        prev.map((c) =>
+          c._id === activeConversationId
+            ? {
+                ...c,
+                lastMessage: {
+                  text: trimmed,
+                  sender: currentUser._id,
+                  createdAt: optimisticMsg.createdAt,
+                },
+                updatedAt: optimisticMsg.createdAt,
+              }
+            : c
+        )
+      );
+
+      // Attempt send via Socket.io first
+      const sentOverSocket = socketService.sendMessage(activeConversationId, trimmed, (ack) => {
+        if ("status" in ack && ack.status === "ok") {
+          const realMsg = ack.message;
+          setMessages((prev) =>
+            prev.map((m) => (m.tempId === tempId || m._id === tempId ? { ...realMsg, status: "sent" } : m))
+          );
+        } else if ("error" in ack) {
+          setMessages((prev) =>
+            prev.map((m) => (m.tempId === tempId || m._id === tempId ? { ...m, status: "error" } : m))
+          );
+        }
+      });
+
+      if (!sentOverSocket) {
+        // Fallback to REST API
+        const res = await api.sendMessage(activeConversationId, trimmed);
+        if (res.data) {
+          const realMsg = res.data;
+          setMessages((prev) =>
+            prev.map((m) => (m.tempId === tempId || m._id === tempId ? { ...realMsg, status: "sent" } : m))
+          );
+        } else {
+          setMessages((prev) =>
+            prev.map((m) => (m.tempId === tempId || m._id === tempId ? { ...m, status: "error" } : m))
+          );
+          return false;
+        }
+      }
+
+      return true;
+    },
+    [activeConversationId, currentUser]
+  );
+
+  // 5. Select a conversation
+  const selectConversation = useCallback((conversationId: string) => {
+    setActiveConversationId(conversationId);
+    // Clear unread count for this conversation
+    setConversations((prev) =>
+      prev.map((c) => (c._id === conversationId ? { ...c, unreadCount: 0 } : c))
+    );
+  }, []);
+
+  // 6. Socket listeners & real-time setup
+  useEffect(() => {
+    const unsubStatus = socketService.onStatusChange(setSocketStatus);
+
+    const unsubMessage = socketService.onMessage((incomingMsg: Message) => {
+      const isForActive = incomingMsg.conversation === activeConvRef.current;
+      const isFromSelf = incomingMsg.sender === currentUser?._id;
+
+      if (isForActive) {
+        setMessages((prev) => {
+          // If this was an optimistic message sent by us, replace it or ignore if already present
+          const alreadyExists = prev.some(
+            (m) => m._id === incomingMsg._id || (m.tempId && m.text === incomingMsg.text && m.sender === incomingMsg.sender)
+          );
+          if (alreadyExists) {
+            return prev.map((m) => (m.text === incomingMsg.text && m.sender === incomingMsg.sender ? { ...incomingMsg, status: "sent" } : m));
+          }
+          return [...prev, incomingMsg];
+        });
+
+        if (!isFromSelf) {
+          sounds.playReceive();
+        }
+      } else {
+        if (!isFromSelf) {
+          sounds.playPop();
+        }
+      }
+
+      // Update conversation list preview & unread count
+      setConversations((prev) => {
+        let found = false;
+        const updated = prev.map((c) => {
+          if (c._id === incomingMsg.conversation) {
+            found = true;
+            return {
+              ...c,
+              lastMessage: {
+                text: incomingMsg.text,
+                sender: incomingMsg.sender,
+                createdAt: incomingMsg.createdAt,
+              },
+              updatedAt: incomingMsg.createdAt,
+              unreadCount: isForActive ? 0 : (c.unreadCount || 0) + 1,
+            };
+          }
+          return c;
+        });
+
+        if (!found) {
+          // Refresh conversation list if brand new conversation
+          fetchConversations();
+          return prev;
+        }
+
+        // Re-sort with most active on top
+        return updated.sort((a, b) => {
+          const timeA = new Date(a.updatedAt || a.createdAt || 0).getTime();
+          const timeB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+          return timeB - timeA;
+        });
+      });
+    });
+
+    const unsubConv = socketService.onConversationUpdated((updatedConv: Conversation) => {
+      setConversations((prev) => {
+        const index = prev.findIndex((c) => c._id === updatedConv._id);
+        if (index >= 0) {
+          const clone = [...prev];
+          clone[index] = { ...clone[index], ...updatedConv };
+          return clone;
+        } else {
+          return [updatedConv, ...prev];
+        }
+      });
+    });
+
+    return () => {
+      unsubStatus();
+      unsubMessage();
+      unsubConv();
+    };
+  }, [currentUser, fetchConversations]);
+
+  // Load initial conversations on mount
+  useEffect(() => {
+    if (currentUser) {
+      fetchConversations();
+    }
+  }, [currentUser, fetchConversations]);
+
+  // Load messages whenever active conversation changes
+  useEffect(() => {
+    if (activeConversationId) {
+      loadMessages(activeConversationId);
+    } else {
+      setMessages([]);
+    }
+  }, [activeConversationId, loadMessages]);
+
+  return {
+    conversations,
+    activeConversationId,
+    activeConversation,
+    messages,
+    isLoadingConversations,
+    isLoadingMessages,
+    isLoadingMore,
+    hasMore,
+    socketStatus,
+    error,
+    selectConversation,
+    sendMessage,
+    loadOlderMessages,
+    fetchConversations,
+    setConversations,
+  };
+}
