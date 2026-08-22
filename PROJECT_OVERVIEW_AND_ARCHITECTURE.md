@@ -105,11 +105,11 @@ home-assignment/
 │   └── tsconfig.json              # Backend TypeScript compiler configuration
 │
 ├── frontend/                      # Next.js 14 App Router Frontend
-│   ├── public/                    # Static public assets
+│   ├── public/                    # Static public assets (openapi.json)
 │   ├── src/
 │   │   ├── app/                   # App Router Pages & Layouts
 │   │   │   ├── chat/              # Chat application workspace (/chat)
-│   │   │   │   └── page.tsx       # Main chat application page
+│   │   │   │   └── page.tsx       # Main chat application page & layout coordinator
 │   │   │   ├── docs/              # Interactive API Explorer (/docs)
 │   │   │   │   └── page.tsx       # Interactive OpenAPI test runner
 │   │   │   ├── login/             # Login / registration screen (/login)
@@ -120,35 +120,32 @@ home-assignment/
 │   │   │
 │   │   ├── components/            # Reusable UI & Feature Components
 │   │   │   ├── chat/              # Chat feature components
-│   │   │   │   ├── ChatArea.tsx           # Central chat layout coordinator
-│   │   │   │   ├── ChatHeader.tsx         # Active conversation header & search trigger
-│   │   │   │   ├── ConversationSidebar.tsx# Sidebar list, filter, theme toggle, logout
-│   │   │   │   ├── GroupInfoDrawer.tsx    # Slide-over drawer (rename, members, leave)
-│   │   │   │   ├── MessageBubble.tsx      # Individual message bubble, ticks & status
-│   │   │   │   ├── MessageInput.tsx       # Textarea input, emojis, shortcut handling
-│   │   │   │   ├── MessageList.tsx        # Virtual scroll container & date separators
-│   │   │   │   ├── NewChatModal.tsx       # Direct message user directory modal
-│   │   │   │   └── NewGroupModal.tsx      # Multi-select group creation modal (>=3 rule)
+│   │   │   │   ├── ChatHeader.tsx           # Active conversation header & search trigger
+│   │   │   │   ├── ChatInput.tsx            # Textarea input, emojis, auto-resize, send guard
+│   │   │   │   ├── ConversationSidebar.tsx  # Sidebar list, filter, theme toggle, logout, error state
+│   │   │   │   ├── GroupInfoDrawer.tsx      # Slide-over drawer (rename, members, leave)
+│   │   │   │   ├── MessageBubble.tsx        # Individual message bubble, ticks, error retry
+│   │   │   │   ├── MessageList.tsx          # Virtual scroll container, date separators, empty/error views
+│   │   │   │   ├── NewConversationModal.tsx # Direct message user directory search modal
+│   │   │   │   └── NewGroupModal.tsx        # Multi-select group creation modal (>=3 rule)
 │   │   │   └── ui/                # Base design system components
-│   │   │       ├── Avatar.tsx             # Avatar with fallback initials & gradients
-│   │   │       ├── Badge.tsx              # Pill badge component
-│   │   │       ├── Button.tsx             # Modern button variants (glass, primary, etc.)
-│   │   │       ├── Input.tsx              # Form input with focus rings
-│   │   │       └── Modal.tsx              # Accessible modal dialog with backdrop
+│   │   │       ├── Avatar.tsx               # Avatar with fallback initials & deterministic colors
+│   │   │       ├── Badge.tsx                # Pill badge component
+│   │   │       └── Modal.tsx                # Accessible modal dialog with backdrop
 │   │   │
 │   │   ├── context/               # React Context Providers
 │   │   │   ├── AuthContext.tsx    # JWT session state, restoreSession, login, logout
 │   │   │   └── ThemeContext.tsx   # Dark/Light mode provider with localStorage sync
 │   │   │
 │   │   ├── hooks/                 # Custom React Hooks
-│   │   │   ├── useChat.ts         # Core chat state, optimistic UI, socket listeners
-│   │   │   └── useSmartScroll.ts  # Threshold auto-scroll, unread pill & scroll offset
+│   │   │   ├── useChat.ts         # Core chat state, optimistic UI, socket listeners, retry logic
+│   │   │   └── useSmartScroll.ts  # Threshold auto-scroll, unread pill & scroll offset continuity
 │   │   │
 │   │   ├── lib/                   # Utility Libraries & Services
-│   │   │   ├── api.ts             # Axios REST client with interceptors & fallbacks
-│   │   │   ├── socket.ts          # Socket.io client wrapper & reconnection engine
+│   │   │   ├── api.ts             # Native fetch client with typed ApiClient wrapper & interceptors
+│   │   │   ├── socket.ts          # Socket.io client wrapper, payload normalizer & reconnection engine
 │   │   │   ├── sound.ts           # Web Audio API procedural sound synthesizer
-│   │   │   └── utils.ts           # ID normalizers, date formatters, cn class merger
+│   │   │   └── utils.ts           # ID normalizers (getSenderId), date formatters, cn class merger
 │   │   │
 │   │   └── types/                 # TypeScript Type Definitions
 │   │       └── index.ts           # User, Conversation, Message, Participant types
@@ -156,9 +153,8 @@ home-assignment/
 │   ├── .eslintrc.json             # ESLint configuration (next/core-web-vitals)
 │   ├── .env.example               # Frontend environment template
 │   ├── next.config.mjs            # Next.js configuration
-│   ├── package.json               # Frontend dependencies (React, Lucide, Tailwind, etc.)
+│   ├── package.json               # Frontend dependencies (Next 14, React 18, Tailwind v4, Socket.io 4.8)
 │   ├── postcss.config.mjs         # PostCSS configuration
-│   ├── tailwind.config.ts         # Tailwind CSS design system tokens & animations
 │   └── tsconfig.json              # Frontend TypeScript compiler configuration
 │
 ├── docs/                          # Additional documentation assets
@@ -269,17 +265,17 @@ During rigorous live testing against `https://frontend-task-chatapp.onrender.com
 
 ## 7. Technology Stack & Dependency Matrix
 
-| Category | Technology / Library | Purpose |
-| :--- | :--- | :--- |
-| **Framework** | Next.js 14.2 (App Router) | React server/client framework, routing, and fast SSR |
-| **Language** | TypeScript 5.5 | End-to-end static typing and interface contracts |
-| **Styling** | Tailwind CSS 3.4 | Utility-first design system with CSS custom properties |
-| **Icons** | Lucide React | Modern, consistent iconography |
-| **Real-Time** | Socket.io Client 4.7 | WebSocket connection, room events, reconnection |
-| **HTTP Client** | Axios 1.7 / Native Fetch | REST API communication with interceptors |
-| **Date Utilities** | date-fns 3.6 | Date formatting, separators, and relative timestamps |
-| **Toasts** | React Hot Toast 2.4 | Accessible, non-blocking toast notifications |
-| **Code Quality** | ESLint 8.57 + Prettier | Zero-warning linting with `next/core-web-vitals` |
+| Category | Technology / Library | Version | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Framework** | Next.js (App Router) | `14.2.23` | React 18 production framework, routing, and fast SSR |
+| **Language** | TypeScript | `5.7.3` | End-to-end static typing and interface contracts |
+| **Styling** | Tailwind CSS | `4.0.0` | Utility-first design system with CSS custom properties |
+| **Icons** | Lucide React | `0.475.0` | Modern, consistent iconography |
+| **Real-Time** | Socket.io Client | `4.8.1` | WebSocket connection, room events, reconnection |
+| **HTTP Client** | Native Fetch (`ApiClient`) | ES2022 | Typed REST API communication with interceptors |
+| **Date Utilities** | date-fns | `4.1.0` | Date formatting, separators, and relative timestamps |
+| **Notifications** | Sonner / Custom Toasts | `1.7.4` | Accessible, non-blocking toast notifications |
+| **Code Quality** | ESLint + eslint-config-next | `8.57.1 / 14.2` | Zero-warning linting with `next/core-web-vitals` |
 
 ---
 

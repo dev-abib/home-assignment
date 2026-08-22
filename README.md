@@ -35,7 +35,6 @@
 │   │   │   ├── 📂 chat/page.tsx    # Part 1: Chat Application Panel
 │   │   │   ├── 📂 login/page.tsx   # Part 1: Auth Screen (Phone + Name Auto-Registration)
 │   │   │   ├── 📂 docs/page.tsx    # Part 1: Interactive API Playground
-│   │   │   ├── 📂 openapi.json/    # Route handler for dynamic OpenAPI JSON spec
 │   │   │   ├── 📄 globals.css      # Tailwind v4 theme tokens & glassmorphic styling
 │   │   │   └── 📄 layout.tsx       # Auth & Dark/Light Theme Providers
 │   │   ├── 📂 components/chat/     # Sidebar, Header, MessageList, Bubble, Input, Modals, Drawer
