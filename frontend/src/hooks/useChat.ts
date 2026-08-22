@@ -182,13 +182,26 @@ export function useChat({ currentUser }: UseChatProps) {
 
       if (isForActive) {
         setMessages((prev) => {
-          // If this was an optimistic message sent by us, replace it or ignore if already present
-          const alreadyExists = prev.some(
-            (m) => m._id === incomingMsg._id || (m.tempId && m.text === incomingMsg.text && m.sender === incomingMsg.sender)
-          );
-          if (alreadyExists) {
-            return prev.map((m) => (m.text === incomingMsg.text && m.sender === incomingMsg.sender ? { ...incomingMsg, status: "sent" } : m));
+          // If this message is already rendered by _id, ignore or update status
+          const hasExactId = prev.some((m) => m._id === incomingMsg._id);
+          if (hasExactId) {
+            return prev.map((m) => (m._id === incomingMsg._id ? { ...incomingMsg, status: "sent" as const } : m));
           }
+
+          // If there is a pending optimistic message matching text and sender, replace the first pending one
+          let replacedPending = false;
+          const updated = prev.map((m) => {
+            if (!replacedPending && m.tempId && m.status === "sending" && m.text === incomingMsg.text && m.sender === incomingMsg.sender) {
+              replacedPending = true;
+              return { ...incomingMsg, status: "sent" as const };
+            }
+            return m;
+          });
+
+          if (replacedPending) {
+            return updated;
+          }
+
           return [...prev, incomingMsg];
         });
 

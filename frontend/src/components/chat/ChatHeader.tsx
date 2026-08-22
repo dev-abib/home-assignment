@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
-import { Conversation, GroupConversation, DirectConversation } from "@/types";
+import { Conversation, GroupConversation, DirectConversation, ConversationParticipant } from "@/types";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Info, Search, ChevronLeft, X } from "lucide-react";
 
 interface ChatHeaderProps {
   conversation: Conversation;
+  currentUserId?: string;
   onOpenInfo: () => void;
   onBack?: () => void;
   searchQuery: string;
@@ -18,6 +19,7 @@ interface ChatHeaderProps {
 
 export function ChatHeader({
   conversation,
+  currentUserId,
   onOpenInfo,
   onBack,
   searchQuery,
@@ -32,9 +34,9 @@ export function ChatHeader({
   let otherUser = directConv?.participant;
   if (!otherUser && Array.isArray(directConv?.participants)) {
     const found = directConv.participants.find(
-      (p) => typeof p === "object" && p !== null
+      (p) => typeof p === "object" && p !== null && (p as ConversationParticipant)._id !== currentUserId
     );
-    if (found && typeof found === "object") otherUser = found as any;
+    if (found && typeof found === "object") otherUser = found as ConversationParticipant;
   }
 
   const name = isGroup

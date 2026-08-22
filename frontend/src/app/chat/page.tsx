@@ -139,6 +139,7 @@ export default function ChatPage() {
             {/* Active Conversation Header */}
             <ChatHeader
               conversation={activeConversation}
+              currentUserId={user?._id}
               onOpenInfo={() => setIsGroupInfoOpen(true)}
               onBack={() => setMobileShowChat(false)}
               searchQuery={chatSearchQuery}
