@@ -26,7 +26,13 @@ export default function LoginPage() {
   }, [isAuthenticated, router]);
 
   const handlePhoneChange = (val: string) => {
-    setPhone(val);
+    // Strip out all alphabetic characters and illegal symbols immediately
+    let sanitized = val.replace(/[^0-9+\s\-()]/g, "");
+    // Ensure '+' can only appear as the leading character
+    if (sanitized.includes("+")) {
+      sanitized = (sanitized.startsWith("+") ? "+" : "") + sanitized.replace(/\+/g, "");
+    }
+    setPhone(sanitized);
     if (phoneError) setPhoneError(null);
     if (error) setError(null);
   };
@@ -41,6 +47,14 @@ export default function LoginPage() {
     e.preventDefault();
 
     // 1. Phone number validation
+    const rawDigits = phone.replace(/\D/g, "");
+    if (rawDigits.length < 7 || rawDigits.length > 15) {
+      const msg = "Phone number must contain between 7 and 15 digits (e.g. +15551234567).";
+      setPhoneError(msg);
+      setError(msg);
+      return;
+    }
+
     const phoneVal = validatePhoneNumber(phone);
     if (!phoneVal.isValid) {
       setPhoneError(phoneVal.error || "Please enter a valid phone number.");
@@ -142,9 +156,21 @@ export default function LoginPage() {
                 <Phone className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${phoneError ? "text-destructive" : "text-muted-foreground"}`} />
                 <input
                   type="tel"
+                  inputMode="tel"
                   placeholder="+15551234567"
                   value={phone}
                   onChange={(e) => handlePhoneChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    // Block alphabetic characters from being typed
+                    if (
+                      e.key.length === 1 &&
+                      !/[0-9+\s\-()]/.test(e.key) &&
+                      !e.ctrlKey &&
+                      !e.metaKey
+                    ) {
+                      e.preventDefault();
+                    }
+                  }}
                   required
                   className={`w-full bg-secondary/70 border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-mono ${
                     phoneError ? "border-destructive focus:ring-destructive/40" : "border-border/70"
@@ -157,7 +183,7 @@ export default function LoginPage() {
                 </span>
               ) : (
                 <span className="text-[10px] text-muted-foreground mt-1 block">
-                  Include country code (7–15 digits, e.g. +15551234567 or +8801712345678)
+                  Numbers only (7–15 digits, e.g. +15551234567 or +8801712345678)
                 </span>
               )}
             </div>
