@@ -269,7 +269,7 @@ export default function LandingPage() {
           {/* Simulator Message Stream */}
           <div
             ref={simScrollRef}
-            className="h-80 overflow-y-auto p-5 space-y-3 bg-background/40"
+            className="min-h-[260px] max-h-[340px] overflow-y-auto p-5 sm:p-6 space-y-3.5 bg-background/50"
           >
             {simMessages.map((msg) => {
               const isSelf = msg.sender === activePersona;
@@ -290,13 +290,13 @@ export default function LandingPage() {
 
                   <div className={`max-w-[75%] ${isSelf ? "items-end" : "items-start"}`}>
                     <div
-                      className={`px-4 py-2 rounded-2xl text-xs leading-relaxed ${
+                      className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
                         isSelf ? "bubble-self" : "bubble-other border border-border/40"
                       }`}
                     >
                       <p>{msg.text}</p>
                       <p
-                        className={`text-[9px] mt-1 text-right ${
+                        className={`text-[9px] sm:text-[10px] mt-1 text-right ${
                           isSelf ? "text-white/70" : "text-muted-foreground"
                         }`}
                       >
@@ -324,22 +324,22 @@ export default function LandingPage() {
           </div>
 
           {/* Simulator Input Footer */}
-          <form onSubmit={handleSimSend} className="p-3 border-t border-border/80 bg-card flex items-center gap-2">
+          <form onSubmit={handleSimSend} className="p-4 sm:p-4.5 border-t border-border/80 bg-card/90 flex items-center gap-2.5">
             <input
               type="text"
               placeholder={`Send message as ${activePersona === "alex" ? "Alex" : "Taylor"}...`}
               value={simInput}
               onChange={(e) => setSimInput(e.target.value)}
-              className="flex-1 bg-secondary/70 border border-border/70 rounded-xl px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              className="flex-1 bg-secondary/80 border border-border/80 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
             />
 
             <button
               type="submit"
               disabled={!simInput.trim()}
-              className="p-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white disabled:opacity-40 transition-all active:scale-95 shadow-sm"
+              className="w-10 h-10 rounded-xl bg-primary hover:bg-primary-hover text-white disabled:opacity-40 transition-all active:scale-95 shadow-md shadow-primary/20 flex items-center justify-center shrink-0 cursor-pointer disabled:cursor-not-allowed"
               title="Send Message"
             >
-              <Send className="w-3.5 h-3.5" />
+              <Send className="w-4 h-4" />
             </button>
           </form>
         </div>
