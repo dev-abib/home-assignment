@@ -227,39 +227,39 @@ Instead of bundling external `.mp3` or `.wav` files (which cause slow downloads 
 
 During rigorous live testing against `https://frontend-task-chatapp.onrender.com`, several critical edge cases were discovered and permanently resolved:
 
-### 1. The Socket Key Discrepancy (`id` vs `_id`) & Message Disappearance Bug
+### 6.1 The Socket Key Discrepancy (`id` vs `_id`) & Message Disappearance Bug
 - **The Bug:** When receiving messages over `socket.on("message:new")`, the Render backend emitted the object with `{ id: "..." }` instead of `{ _id: "..." }`.
 - **The Impact:** In React state, `incomingMsg._id` was `undefined`. When a second message arrived, the check `prev.some(m => m._id === incomingMsg._id)` evaluated `undefined === undefined` (`true`), causing React to replace the previous message instead of appending it.
 - **The Fix:** Normalized all incoming socket messages in `socket.ts` so `_id = data._id || data.id`, and added strict non-empty guards in `useChat.ts` (`!!m._id && m._id === incomingMsg._id`).
 
-### 2. Spinning Loader on Sent Messages
+### 6.2 Spinning Loader on Sent Messages
 - **The Bug:** Client attempted to send messages via `socket.emit("message:send", ..., ack)` expecting `{ status: "ok", message: ... }`. The Render backend returned `{ ok: true }` without a message payload, leaving optimistic messages permanently stuck in `status: "sending"`.
 - **The Fix:** Dispatched outgoing messages via `api.sendMessage()`, which deterministically returns the MongoDB document and resolves `status: "sent"` in ~200ms. Restrict `<Loader2 />` in `MessageBubble.tsx` strictly to unconfirmed temporary IDs (`temp_...`).
 
-### 3. Populated Sender Document vs. String ID
+### 6.3 Populated Sender Document vs. String ID
 - **The Bug:** Server endpoints populate `sender` as an object `{ _id: "...", name: "..." }`. Comparing `message.sender === currentUser._id` evaluated to `false`, displaying the user's own messages on the left with a "ME" avatar.
 - **The Fix:** Created `getSenderId(sender)` in `utils.ts` to extract the string ID regardless of whether `sender` is an object or string ID.
 
-### 4. Group Minimum of 3 Members Constraint
+### 6.4 Group Minimum of 3 Members Constraint
 - **The Bug:** `POST /api/conversations/group` requires at least 3 total participants (creator + at least 2 selected users).
 - **The Fix:** Built validation in `NewGroupModal.tsx` requiring at least 2 participants before enabling the "Create Group" button.
 
-### 5. Socket Room Subscription Synchronization
+### 6.5 Socket Room Subscription Synchronization
 - **The Bug:** When opening a conversation, without emitting `conversation:join`, the socket connection was not added to the conversation room.
 - **The Fix:** Added `socketService.joinConversation(conversationId)` whenever active conversation changes in `useChat.ts`.
 
-### 6. Empty & Whitespace Message Validation
+### 6.6 Empty & Whitespace Message Validation
 - **Requirement:** Prevent sending empty messages or strings containing only whitespace (spaces, tabs, newlines).
 - **The Implementation:** Guarded on two independent layers:
   1. **UI Layer (`ChatInput.tsx`):** The send button is dynamically disabled when `!text.trim()`, and pressing <kbd>Enter</kbd> ignores whitespace-only strings.
   2. **Hook Layer (`useChat.ts`):** `sendMessage(text)` checks `if (!text.trim()) return false;` before creating optimistic messages or calling the API.
 
-### 7. Comprehensive Multi-Scenario Empty States
+### 6.7 Comprehensive Multi-Scenario Empty States
 - **Zero Conversations:** When a brand-new user has no chats, `ConversationSidebar.tsx` renders a dedicated empty state prompting them to start a direct message or create a group with a 1-click directory search button.
 - **No Conversation Selected:** When no chat is active, `page.tsx` displays an onboarding hub with quick-start action cards for Direct Messages and Group Channels.
 - **Zero Messages in Conversation:** Newly created conversations render a "No messages yet — say hi!" illustration in `MessageList.tsx`.
 
-### 8. Visible Error States, Message Resend & Socket Reconnection
+### 6.8 Visible Error States, Message Resend & Socket Reconnection
 - **Failed Message Send (`MessageBubble.tsx`):** If `POST /api/messages` fails, the optimistic bubble turns into a red error container with a visible **"Failed to send. Retry"** action powered by `retrySendMessage()`.
 - **Failed Conversation/Message Fetch (`MessageList.tsx` / `ConversationSidebar.tsx`):** Renders visible error cards with a **"Retry Connection"** button instead of an infinite loading spinner.
 - **Socket Disconnection Alert (`page.tsx`):** When `socketStatus === "disconnected"`, an animated amber banner notifies the user that real-time sync is interrupted and messages are being delivered via HTTP backup.
@@ -291,13 +291,13 @@ During rigorous live testing against `https://frontend-task-chatapp.onrender.com
 
 ### 8.2 Installation & Setup
 
-1. **Clone the Repository:**
-   ```bash
-   git clone https://github.com/dev-abib/home-assignment.git
-   cd home-assignment
-   ```
+```bash
+# Clone the Repository:
+git clone https://github.com/dev-abib/home-assignment.git
+cd home-assignment
+```
 
-### 8.2 Startup Options
+### 8.3 Startup Options
 
 #### Option A: Quickstart (Frontend with Live Render Cloud Backend — Recommended)
 *Pre-configured by default to connect directly to the live Render backend without requiring a local database.*
