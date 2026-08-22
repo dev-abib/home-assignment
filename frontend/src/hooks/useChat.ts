@@ -56,7 +56,11 @@ export function useChat({ currentUser }: UseChatProps) {
     const res = await api.getMessages(conversationId, { limit: 30 });
     if (res.data) {
       // API returns messages in descending order (newest first). Reverse to ascending (oldest first).
-      const sorted = [...res.data.messages].reverse();
+      const sentList: Message[] = res.data.messages.map((m) => ({
+        ...m,
+        status: "sent" as const,
+      }));
+      const sorted = [...sentList].reverse();
       // Deduplicate by _id
       const uniqueMessages = Array.from(new Map(sorted.map((m) => [m._id, m])).values());
       setMessages(uniqueMessages);
@@ -77,7 +81,11 @@ export function useChat({ currentUser }: UseChatProps) {
 
     const res = await api.getMessages(activeConversationId, { limit: 20, before: beforeId });
     if (res.data) {
-      const olderMessages = [...res.data.messages].reverse();
+      const olderSent: Message[] = res.data.messages.map((m) => ({
+        ...m,
+        status: "sent" as const,
+      }));
+      const olderMessages = [...olderSent].reverse();
 
       // Deduplicate against existing messages
       setMessages((prev) => {

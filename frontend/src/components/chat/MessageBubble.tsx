@@ -81,7 +81,7 @@ export function MessageBubble({
 
             {isSelf && (
               <span className="shrink-0 ml-0.5">
-                {message.status === "sending" ? (
+                {message.status === "sending" && message._id.startsWith("temp_") ? (
                   <Loader2 className="w-3 h-3 animate-spin text-white/80" />
                 ) : message.status === "error" ? (
                   <AlertCircle className="w-3 h-3 text-rose-300" />
