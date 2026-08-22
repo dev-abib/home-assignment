@@ -5,6 +5,7 @@ import { Conversation, Message, User } from "@/types";
 import { api } from "@/lib/api";
 import { socketService } from "@/lib/socket";
 import { sounds } from "@/lib/sound";
+import { getSenderId } from "@/lib/utils";
 
 interface UseChatProps {
   currentUser: User | null;
@@ -159,6 +160,9 @@ export function useChat({ currentUser }: UseChatProps) {
   // 5. Select a conversation
   const selectConversation = useCallback((conversationId: string) => {
     setActiveConversationId(conversationId);
+    if (conversationId) {
+      socketService.joinConversation(conversationId);
+    }
     // Clear unread count for this conversation
     setConversations((prev) =>
       prev.map((c) => (c._id === conversationId ? { ...c, unreadCount: 0 } : c))
@@ -171,7 +175,8 @@ export function useChat({ currentUser }: UseChatProps) {
 
     const unsubMessage = socketService.onMessage((incomingMsg: Message) => {
       const isForActive = incomingMsg.conversation === activeConvRef.current;
-      const isFromSelf = incomingMsg.sender === currentUser?._id;
+      const incomingSenderId = getSenderId(incomingMsg.sender);
+      const isFromSelf = !!currentUser?._id && incomingSenderId === currentUser._id;
 
       if (isForActive) {
         setMessages((prev) => {
@@ -184,9 +189,16 @@ export function useChat({ currentUser }: UseChatProps) {
           // If there is a pending optimistic message matching text and sender, replace the first pending one
           let replacedPending = false;
           const updated = prev.map((m) => {
-            if (!replacedPending && m.tempId && m.status === "sending" && m.text === incomingMsg.text && m.sender === incomingMsg.sender) {
+            const mSenderId = getSenderId(m.sender);
+            if (
+              !replacedPending &&
+              m.tempId &&
+              m.status === "sending" &&
+              m.text === incomingMsg.text &&
+              (mSenderId === incomingSenderId || !mSenderId || mSenderId === currentUser?._id)
+            ) {
               replacedPending = true;
-              return { ...incomingMsg, status: "sent" as const };
+              return { ...incomingMsg, status: "sent" as const, tempId: m.tempId };
             }
             return m;
           });
@@ -217,7 +229,7 @@ export function useChat({ currentUser }: UseChatProps) {
               ...c,
               lastMessage: {
                 text: incomingMsg.text,
-                sender: incomingMsg.sender,
+                sender: incomingSenderId,
                 createdAt: incomingMsg.createdAt,
               },
               updatedAt: incomingMsg.createdAt,
@@ -272,6 +284,7 @@ export function useChat({ currentUser }: UseChatProps) {
   // Load messages whenever active conversation changes
   useEffect(() => {
     if (activeConversationId) {
+      socketService.joinConversation(activeConversationId);
       loadMessages(activeConversationId);
     } else {
       setMessages([]);

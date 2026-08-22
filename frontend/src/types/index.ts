@@ -9,7 +9,7 @@ export interface User {
 export interface Message {
   _id: string;
   conversation: string;
-  sender: string;
+  sender: string | User | { _id: string; name?: string; phone?: string };
   text: string;
   createdAt: string;
   // Client-side UI enhancements

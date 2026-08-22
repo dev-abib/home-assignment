@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import { Message, User, Conversation, GroupConversation } from "@/types";
 import { MessageBubble } from "@/components/chat/MessageBubble";
-import { formatDateSeparator } from "@/lib/utils";
+import { formatDateSeparator, getSenderId } from "@/lib/utils";
 import { useSmartScroll } from "@/hooks/useSmartScroll";
 import { ChevronDown, Loader2, MessageSquare } from "lucide-react";
 
@@ -51,7 +51,7 @@ export function MessageList({
   useEffect(() => {
     if (messages.length > lastMessageCountRef.current) {
       const newestMsg = messages[messages.length - 1];
-      const isSelf = newestMsg.sender === currentUser?._id;
+      const isSelf = !!currentUser?._id && getSenderId(newestMsg.sender) === currentUser._id;
       handleNewMessage(isSelf);
     }
     lastMessageCountRef.current = messages.length;
@@ -135,8 +135,13 @@ export function MessageList({
 
         {/* Render Messages with Date Separators */}
         {messages.map((message, index) => {
-          const isSelf = message.sender === currentUser?._id;
-          const senderUser = participantMap.get(message.sender) || null;
+          const senderId = getSenderId(message.sender);
+          const isSelf = !!currentUser?._id && senderId === currentUser._id;
+          const senderUser =
+            participantMap.get(senderId) ||
+            (typeof message.sender === "object" && message.sender !== null
+              ? (message.sender as User)
+              : null);
 
           // Date Separator logic
           const currentDateStr = formatDateSeparator(message.createdAt);

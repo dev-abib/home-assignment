@@ -63,6 +63,18 @@ class SocketService {
     this.updateStatus("disconnected");
   }
 
+  public joinConversation(conversationId: string) {
+    if (this.socket && this.socket.connected && conversationId) {
+      this.socket.emit("conversation:join", conversationId);
+    }
+  }
+
+  public leaveConversation(conversationId: string) {
+    if (this.socket && this.socket.connected && conversationId) {
+      this.socket.emit("conversation:leave", conversationId);
+    }
+  }
+
   public sendMessage(
     conversationId: string,
     text: string,

@@ -71,3 +71,20 @@ export function getInitials(name: string = ""): string {
   if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
+
+export function getSenderId(sender: unknown): string {
+  if (!sender) return "";
+  if (typeof sender === "string") return sender;
+  if (typeof sender === "object" && sender !== null && "_id" in sender) {
+    return String((sender as { _id: string })._id);
+  }
+  return String(sender);
+}
+
+export function getSenderName(sender: unknown): string {
+  if (!sender) return "";
+  if (typeof sender === "object" && sender !== null && "name" in sender) {
+    return String((sender as { name?: string }).name || "");
+  }
+  return "";
+}
