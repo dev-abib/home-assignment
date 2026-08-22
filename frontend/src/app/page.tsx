@@ -269,7 +269,7 @@ export default function LandingPage() {
           {/* Simulator Message Stream */}
           <div
             ref={simScrollRef}
-            className="h-[320px] sm:h-[360px] overflow-y-auto p-5 sm:p-6 pb-8 space-y-4 bg-background/60 scroll-smooth"
+            className="h-[340px] overflow-y-auto p-6 pb-6 space-y-4 bg-background/40 scroll-smooth"
           >
             {simMessages.map((msg) => {
               const isSelf = msg.sender === activePersona;
@@ -279,7 +279,7 @@ export default function LandingPage() {
                   className={`flex gap-3 ${isSelf ? "flex-row-reverse" : "flex-row"} animate-fade-in items-end`}
                 >
                   <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 mb-0.5 shadow-sm ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 mb-1 shadow-sm ${
                       msg.sender === "alex"
                         ? "bg-gradient-to-tr from-primary to-indigo-500"
                         : "bg-gradient-to-tr from-indigo-600 to-purple-600"
@@ -290,16 +290,16 @@ export default function LandingPage() {
 
                   <div className={`max-w-[75%] ${isSelf ? "items-end" : "items-start"}`}>
                     <div
-                      className={`px-4.5 py-3 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-sm ${
+                      className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-sm ${
                         isSelf
-                          ? "bg-gradient-to-r from-primary via-indigo-600 to-purple-600 text-white rounded-br-xs"
-                          : "bg-card border border-border text-foreground rounded-bl-xs"
+                          ? "bg-gradient-to-r from-primary via-indigo-600 to-purple-600 text-white rounded-br-sm"
+                          : "bg-card border border-border text-foreground rounded-bl-sm"
                       }`}
                     >
                       <p>{msg.text}</p>
                       <p
-                        className={`text-[9px] sm:text-[10px] mt-1.5 text-right font-medium ${
-                          isSelf ? "text-white/75" : "text-muted-foreground"
+                        className={`text-[10px] mt-1.5 text-right font-medium ${
+                          isSelf ? "text-white/80" : "text-muted-foreground"
                         }`}
                       >
                         {msg.time}
@@ -312,11 +312,11 @@ export default function LandingPage() {
 
             {/* Simulated Typing indicator */}
             {isTyping && (
-              <div className="flex items-center gap-2.5 text-muted-foreground text-xs animate-fade-in items-end pb-2">
-                <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-[9px] font-bold shrink-0 mb-0.5">
+              <div className="flex items-center gap-2.5 text-muted-foreground text-xs animate-fade-in items-end pb-1">
+                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold shrink-0 mb-1">
                   {activePersona === "alex" ? "TS" : "AL"}
                 </div>
-                <div className="px-4 py-2.5 rounded-2xl bg-card border border-border flex items-center gap-1.5 shadow-sm">
+                <div className="px-4 py-2 rounded-2xl bg-card border border-border flex items-center gap-1.5 shadow-sm">
                   <span className="typing-dot" />
                   <span className="typing-dot" />
                   <span className="typing-dot" />
@@ -326,27 +326,29 @@ export default function LandingPage() {
           </div>
 
           {/* Simulator Input Footer */}
-          <form
-            onSubmit={handleSimSend}
-            className="p-4 sm:p-5 border-t border-border/80 bg-card/95 flex items-center gap-3"
-          >
-            <input
-              type="text"
-              placeholder={`Send message as ${activePersona === "alex" ? "Alex" : "Taylor"}...`}
-              value={simInput}
-              onChange={(e) => setSimInput(e.target.value)}
-              className="flex-1 bg-secondary/70 hover:bg-secondary/90 border border-border/80 rounded-2xl px-4.5 py-3 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all shadow-inner"
-            />
-
-            <button
-              type="submit"
-              disabled={!simInput.trim()}
-              className="w-11 h-11 rounded-2xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary-hover hover:to-indigo-700 text-white disabled:opacity-40 transition-all active:scale-95 shadow-md shadow-primary/25 flex items-center justify-center shrink-0 cursor-pointer disabled:cursor-not-allowed"
-              title="Send Message"
+          <div className="p-4 sm:p-5 border-t border-border bg-card">
+            <form
+              onSubmit={handleSimSend}
+              className="flex items-center gap-3"
             >
-              <Send className="w-4 h-4" />
-            </button>
-          </form>
+              <input
+                type="text"
+                placeholder={`Send message as ${activePersona === "alex" ? "Alex" : "Taylor"}...`}
+                value={simInput}
+                onChange={(e) => setSimInput(e.target.value)}
+                className="flex-1 bg-secondary/80 border border-border rounded-xl px-4 py-3 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-inner"
+              />
+
+              <button
+                type="submit"
+                disabled={!simInput.trim()}
+                className="w-11 h-11 rounded-xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary-hover hover:to-indigo-700 text-white disabled:opacity-40 transition-all active:scale-95 shadow-md shadow-primary/25 flex items-center justify-center shrink-0 cursor-pointer disabled:cursor-not-allowed"
+                title="Send Message"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
         </div>
       </section>
 
