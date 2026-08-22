@@ -88,3 +88,55 @@ export function getSenderName(sender: unknown): string {
   }
   return "";
 }
+
+/**
+ * Validates international and local phone numbers according to E.164 recommendation.
+ * Requires 7-15 digits, allowing optional leading '+' and standard separators (spaces, dashes, parens).
+ */
+export function validatePhoneNumber(phone: string): { isValid: boolean; error?: string } {
+  const trimmed = phone.trim();
+  if (!trimmed) {
+    return { isValid: false, error: "Phone number is required." };
+  }
+
+  // Must match phone character set (optional leading +, digits, spaces, dashes, parens)
+  const phoneCharRegex = /^\+?[0-9\s\-\(\)\.]{7,25}$/;
+  if (!phoneCharRegex.test(trimmed)) {
+    return {
+      isValid: false,
+      error: "Phone number contains invalid characters.",
+    };
+  }
+
+  // Extract raw digits
+  const rawDigits = trimmed.replace(/\D/g, "");
+  if (rawDigits.length < 7) {
+    return {
+      isValid: false,
+      error: "Phone number is too short (must contain at least 7 digits).",
+    };
+  }
+
+  if (rawDigits.length > 15) {
+    return {
+      isValid: false,
+      error: "Phone number is too long (maximum 15 digits according to E.164).",
+    };
+  }
+
+  return { isValid: true };
+}
+
+/**
+ * Validates full name input (must be at least 2 non-whitespace characters).
+ */
+export function validateFullName(name: string): { isValid: boolean; error?: string } {
+  const trimmed = name.trim();
+  if (!trimmed) {
+    return { isValid: false, error: "Full name is required." };
+  }
+  if (trimmed.length < 2) {
+    return { isValid: false, error: "Name must be at least 2 characters long." };
+  }
+  return { isValid: true };
+}

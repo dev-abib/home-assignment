@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { Phone, User, ArrowRight, Loader2, MessageSquare, ShieldCheck } from "lucide-react";
+import { Phone, User, ArrowRight, Loader2, MessageSquare, ShieldCheck, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { validatePhoneNumber, validateFullName } from "@/lib/utils";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,6 +16,8 @@ export default function LoginPage() {
   const [name, setName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -22,15 +25,41 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, router]);
 
+  const handlePhoneChange = (val: string) => {
+    setPhone(val);
+    if (phoneError) setPhoneError(null);
+    if (error) setError(null);
+  };
+
+  const handleNameChange = (val: string) => {
+    setName(val);
+    if (nameError) setNameError(null);
+    if (error) setError(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone.trim() || !name.trim()) {
-      setError("Please provide both your phone number and your name.");
+
+    // 1. Phone number validation
+    const phoneVal = validatePhoneNumber(phone);
+    if (!phoneVal.isValid) {
+      setPhoneError(phoneVal.error || "Please enter a valid phone number.");
+      setError(phoneVal.error || "Invalid phone number.");
+      return;
+    }
+
+    // 2. Full name validation
+    const nameVal = validateFullName(name);
+    if (!nameVal.isValid) {
+      setNameError(nameVal.error || "Please enter your name.");
+      setError(nameVal.error || "Invalid name.");
       return;
     }
 
     setIsSubmitting(true);
     setError(null);
+    setPhoneError(null);
+    setNameError(null);
 
     const result = await login(phone.trim(), name.trim());
     if (result.success) {
@@ -97,8 +126,9 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-destructive/15 border border-destructive/30 text-destructive text-xs font-medium animate-fade-in">
-              {error}
+            <div className="mb-4 p-3 rounded-xl bg-destructive/15 border border-destructive/30 text-destructive text-xs font-medium animate-fade-in flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
@@ -109,19 +139,27 @@ export default function LoginPage() {
                 Phone Number
               </label>
               <div className="relative">
-                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Phone className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${phoneError ? "text-destructive" : "text-muted-foreground"}`} />
                 <input
-                  type="text"
+                  type="tel"
                   placeholder="+15551234567"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => handlePhoneChange(e.target.value)}
                   required
-                  className="w-full bg-secondary/70 border border-border/70 rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-mono"
+                  className={`w-full bg-secondary/70 border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-mono ${
+                    phoneError ? "border-destructive focus:ring-destructive/40" : "border-border/70"
+                  }`}
                 />
               </div>
-              <span className="text-[10px] text-muted-foreground mt-1 block">
-                Include country code (e.g. +1 for US, +44 for UK, +880 for BD)
-              </span>
+              {phoneError ? (
+                <span className="text-[10px] text-destructive mt-1 block font-medium animate-fade-in">
+                  {phoneError}
+                </span>
+              ) : (
+                <span className="text-[10px] text-muted-foreground mt-1 block">
+                  Include country code (7–15 digits, e.g. +15551234567 or +8801712345678)
+                </span>
+              )}
             </div>
 
             {/* Display Name Input */}
@@ -130,23 +168,30 @@ export default function LoginPage() {
                 Your Full Name
               </label>
               <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <User className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${nameError ? "text-destructive" : "text-muted-foreground"}`} />
                 <input
                   type="text"
                   placeholder="e.g. Ada Lovelace"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => handleNameChange(e.target.value)}
                   required
-                  className="w-full bg-secondary/70 border border-border/70 rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  className={`w-full bg-secondary/70 border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
+                    nameError ? "border-destructive focus:ring-destructive/40" : "border-border/70"
+                  }`}
                 />
               </div>
+              {nameError && (
+                <span className="text-[10px] text-destructive mt-1 block font-medium animate-fade-in">
+                  {nameError}
+                </span>
+              )}
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
               disabled={isSubmitting || !phone.trim() || !name.trim()}
-              className="w-full mt-2 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary-hover hover:to-indigo-700 text-white text-sm font-semibold shadow-lg shadow-primary/25 transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full mt-2 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary-hover hover:to-indigo-700 text-white text-sm font-semibold shadow-lg shadow-primary/25 transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isSubmitting ? (
                 <>
