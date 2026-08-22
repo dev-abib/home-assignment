@@ -13,27 +13,23 @@ This document details the architectural decisions, design philosophies, AI tooli
 
 ### 1.1 Technology Stack & Architectural Decisions
 
-#### Framework & Language
-- **Next.js 14.2 (App Router) + React 18.3 + TypeScript 5.7:**  
-  We chose Next.js App Router for unified client-side interactivity, fast routing, strict compile-time type safety, and seamless deployment to Vercel (frontend) paired with the live Render backend.
+#### Framework & Language (Next.js 14.2 + React 18.3.1 + TypeScript 5.7.3)
+We chose Next.js App Router for unified client-side interactivity, fast routing, strict compile-time type safety, and seamless deployment to Vercel paired with the live Render backend.
 
-#### Real-Time Dual-Channel Engine
-- **Socket.io Client 4.8 + REST (`/api/*`):**  
-  A dual-pipeline approach was adopted:
-  - **Socket.io Client** maintains a persistent bi-directional connection to the root origin for instant zero-latency message broadcasts (`message:new`, `conversation:updated`) and room subscriptions (`conversation:join`).
-  - **REST Client (`/api/*`)** handles initial loads, historical paging (`before` cursor), user search, and deterministic message dispatch via `POST /api/messages` to avoid race conditions.
+#### Real-Time Dual-Channel Engine (Socket.io Client 4.8 + REST /api/*)
+A dual-pipeline approach was adopted:
+- **Socket.io Client** maintains a persistent bi-directional connection to the root origin for instant zero-latency message broadcasts (`message:new`, `conversation:updated`) and room subscriptions (`conversation:join`).
+- **REST Client (`/api/*`)** handles initial loads, historical paging (`before` cursor), user search, and deterministic message dispatch via `POST /api/messages` to avoid race conditions.
 
-#### Smart Scroll Continuity Hook
-- **`useSmartScroll.ts`:**  
-  To solve the critical requirement of auto-scrolling by default without annoying users who scrolled up to read earlier history, we engineered a dedicated container observer:
-  - Tracks distance from scroll bottom with a 120px threshold.
-  - Automatically scrolls down on outgoing messages and when already at the bottom.
-  - Suppresses auto-scroll when user is scrolled up and displays an animated floating **"↓ X new messages"** pill.
-  - Preserves scroll height offsets (`scrollHeight - previousScrollHeight`) when prepending older pages so the user's viewport never jerks.
+#### Smart Scroll Continuity Hook (useSmartScroll.ts)
+To solve the critical requirement of auto-scrolling by default without annoying users who scrolled up to read earlier history, we engineered a dedicated container observer:
+- Tracks distance from scroll bottom with a 120px threshold.
+- Automatically scrolls down on outgoing messages and when already at the bottom.
+- Suppresses auto-scroll when user is scrolled up and displays an animated floating **"↓ X new messages"** pill.
+- Preserves scroll height offsets (`scrollHeight - previousScrollHeight`) when prepending older pages so the user's viewport never jerks.
 
-#### Web Audio API Sound Synthesis
-- **`sound.ts`:**  
-  Instead of relying on external audio asset files (which risk broken CDN links, CORS issues, or slow network downloads), we built a lightweight synthesizer using the native browser Web Audio API oscillator nodes for outgoing chimes and incoming notification pings.
+#### Web Audio API Sound Synthesis (sound.ts)
+Instead of relying on external audio asset files (which risk broken CDN links, CORS issues, or slow network downloads), we built a lightweight synthesizer using the native browser Web Audio API oscillator nodes for outgoing chimes and incoming notification pings.
 
 ### 1.2 Trade-offs Considered
 
@@ -48,10 +44,15 @@ This document details the architectural decisions, design philosophies, AI tooli
 ## 2. Design Choices (Part 2 — Creative Showcase Landing Page)
 
 ### 2.1 Visual Direction & Brand Identity
-- **Color Palette & Glassmorphism:** Deep space background (`hsl(224, 71%, 4%)`) paired with high-contrast electric indigo/violet gradients, frosted glass cards (`backdrop-filter: blur(16px)`), and crisp typography hierarchy.
-- **Interactive Live Simulator (Bonus Addition):**  
-  Rather than presenting static screenshots or mockups, we created an embedded, interactive 2-user sandbox right on the landing page. Visitors can switch personas ("Alex" and "Taylor"), send real messages, trigger simulated audio notes, observe live typing indicators, and test the smart scroll behavior directly before signing in.
-- **Clarity & Transparency:** Included an interactive API explorer (`/docs`) where reviewers can execute live HTTP requests against the backend and copy cURL commands with 1 click.
+
+#### Color Palette & Glassmorphism
+Deep space background (`hsl(224, 71%, 4%)`) paired with high-contrast electric indigo/violet gradients, frosted glass cards (`backdrop-filter: blur(16px)`), and crisp typography hierarchy.
+
+#### Interactive Live Simulator (Bonus Addition)
+Rather than presenting static screenshots or mockups, we created an embedded, interactive 2-user sandbox right on the landing page. Visitors can switch personas ("Alex" and "Taylor"), send real messages, trigger simulated audio notes, observe live typing indicators, and test the smart scroll behavior directly before signing in.
+
+#### Clarity & Transparency (Interactive API Explorer)
+Included an interactive API explorer (`/docs`) where reviewers can execute live HTTP requests against the backend and copy cURL commands with 1 click.
 
 ---
 
@@ -68,12 +69,24 @@ In compliance with the assignment instructions, below is an honest and complete 
 - Automated API probing scripts to reverse-engineer exact response shapes and error schemas from the Render server.
 
 ### 3.3 What Was Hand-Crafted, Adjusted, or Rejected
-- **Rejected Naive Auto-Scroll:** AI initially suggested simple `scrollIntoView()` on every message update. We rejected this because it violates the core requirement of not forcing scroll when the user is reviewing history. We hand-coded the `useSmartScroll` threshold calculations (120px proximity window) and height offset preservation (`newScrollHeight - previousScrollHeight`) for upward paging.
-- **Identified & Fixed Socket Payload Discrepancy (`id` vs `_id`):** When inspecting live network traffic, we discovered the Render backend socket emitted `{ id: "..." }` while database documents used `{ _id: "..." }`, which caused React state to overwrite incoming messages (`undefined === undefined`). We hand-coded payload normalization in `socket.ts` and strict non-empty deduplication in `useChat.ts`.
-- **Engineered Deterministic Message Delivery:** Rejected relying purely on socket emit acknowledgments (which returned `{ ok: true }` without payload). We routed outgoing sends through `api.sendMessage()` for ~200ms confirmation, reconciliation from temporary IDs to real database IDs, and added an interactive **"Failed to send. Retry"** mechanism.
-- **Corrected URL Routing Paths:** AI initial assumptions attempted to call REST endpoints at root origin; our probe scripts verified that REST is mounted at `/api/*`, while `/health` and `/socket.io` are at root origin.
-- **Hand-Coded Group Creation Validation:** Verified that the API requires at least 3 members, adding multi-select participant chip management and validation warnings before calling `POST /api/conversations/group`.
-- **Deduplication Logic:** Hand-crafted ID map filtering to resolve the inclusive boundary cursor quirk in `GET /api/conversations/{id}/messages`.
+
+#### Rejected Naive Auto-Scroll
+AI initially suggested simple `scrollIntoView()` on every message update. We rejected this because it violates the core requirement of not forcing scroll when the user is reviewing history. We hand-coded the `useSmartScroll` threshold calculations (120px proximity window) and height offset preservation (`newScrollHeight - previousScrollHeight`) for upward paging.
+
+#### Identified & Fixed Socket Payload Discrepancy (id vs _id)
+When inspecting live network traffic, we discovered the Render backend socket emitted `{ id: "..." }` while database documents used `{ _id: "..." }`, which caused React state to overwrite incoming messages (`undefined === undefined`). We hand-coded payload normalization in `socket.ts` and strict non-empty deduplication in `useChat.ts`.
+
+#### Engineered Deterministic Message Delivery
+Rejected relying purely on socket emit acknowledgments (which returned `{ ok: true }` without payload). We routed outgoing sends through `api.sendMessage()` for ~200ms confirmation, reconciliation from temporary IDs to real database IDs, and added an interactive **"Failed to send. Retry"** mechanism.
+
+#### Corrected URL Routing Paths
+AI initial assumptions attempted to call REST endpoints at root origin; our probe scripts verified that REST is mounted at `/api/*`, while `/health` and `/socket.io` are at root origin.
+
+#### Hand-Coded Group Creation Validation
+Verified that the API requires at least 3 members, adding multi-select participant chip management and validation warnings before calling `POST /api/conversations/group`.
+
+#### Deduplication Logic
+Hand-crafted ID map filtering to resolve the inclusive boundary cursor quirk in `GET /api/conversations/{id}/messages`.
 
 ---
 
@@ -91,16 +104,16 @@ In compliance with the assignment instructions, below is an honest and complete 
 
 During our systematic probing of `https://frontend-task-chatapp.onrender.com`, we identified the following real-world behaviors:
 
-### 1. Root vs `/api` Routing Separation
+### 5.1 Root vs /api Routing Separation
 - **Observation:** `GET /health` and Socket.io are mounted at the root origin (`https://frontend-task-chatapp.onrender.com`), while all REST routes (`/auth/login`, `/conversations`, `/messages`) require the `/api` prefix (`/api/auth/login`, `/api/conversations`). Requesting `/auth/login` at root returns `404 Not Found`.
 - **Resolution:** Centralized API client base URL to `https://frontend-task-chatapp.onrender.com/api` and socket client URL to root origin.
 
-### 2. Group Minimum Participant Rule
-- **Observation:** Calling `POST /api/conversations/group` with 1 participant in `participantIds` returns a `400 Bad Request` validation error: `"a group needs at least 3 members"`. The backend counts creator (1) + `participantIds` (at least 2).
+### 5.2 Group Minimum Participant Rule
+- **Observation:** Calling `POST /api/conversations/group` with 1 participant in `participantIds` returns a `400 Bad Request` validation error: `"a group needs at least 3 members"`. The backend counts creator (1) + participantIds (at least 2 additional users).
 - **Resolution:** Added client-side validation in `NewGroupModal` requiring at least 2 other participants to be selected, with live counter badges showing "X more needed".
 
-### 3. Cursor Pagination Inclusive Boundary Duplication
-- **Observation:** When requesting older messages via `GET /api/conversations/{id}/messages?limit=2&before={oldestMessageId}`, the backend query uses inclusive comparison (using <=, not <), returning `{oldestMessageId}` again in the next page.
+### 5.3 Cursor Pagination Inclusive Boundary Duplication
+- **Observation:** When requesting older messages via `GET /api/conversations/{id}/messages?limit=2&before={oldestMessageId}`, the backend query uses an inclusive comparison (<=, not <), returning `{oldestMessageId}` again in the next page.
 - **Resolution:** In `useChat`, we implemented Map/Set deduplication based on `_id` before prepending older messages to the state:
   ```typescript
   setMessages((prev) => {
@@ -110,7 +123,7 @@ During our systematic probing of `https://frontend-task-chatapp.onrender.com`, w
   });
   ```
 
-### 4. Normalized ObjectID Schema
+### 5.4 Normalized ObjectID Schema
 - **Observation:** User and conversation objects return MongoDB ObjectID strings in `_id`. Some responses populate full user objects while others return string IDs.
 - **Resolution:** Created flexible TypeScript union types (`string | User`) and normalized accessors throughout the UI.
 

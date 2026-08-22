@@ -240,7 +240,7 @@ During rigorous live testing against `https://frontend-task-chatapp.onrender.com
 - **The Bug:** Server endpoints populate `sender` as an object `{ _id: "...", name: "..." }`. Comparing `message.sender === currentUser._id` evaluated to `false`, displaying the user's own messages on the left with a "ME" avatar.
 - **The Fix:** Created `getSenderId(sender)` in `utils.ts` to extract the string ID regardless of whether `sender` is an object or string ID.
 
-### 4. Group Minimum (At Least 3 Members) Constraint
+### 4. Group Minimum of 3 Members Constraint
 - **The Bug:** `POST /api/conversations/group` requires at least 3 total participants (creator + at least 2 selected users).
 - **The Fix:** Built validation in `NewGroupModal.tsx` requiring at least 2 participants before enabling the "Create Group" button.
 
