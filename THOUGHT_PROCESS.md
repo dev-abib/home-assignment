@@ -101,3 +101,14 @@ During our systematic probing of `https://frontend-task-chatapp.onrender.com`, w
 ### 4. Normalized ObjectID Schema
 - **Observation:** User and conversation objects return MongoDB ObjectID strings in `_id`. Some responses populate full user objects while others return string IDs.
 - **Resolution:** Created flexible TypeScript union types (`string | User`) and normalized accessors throughout the UI.
+
+---
+
+## 6. Verification of Edge-Case Gaps (Audit Addendum)
+
+1. **Empty & Whitespace Message Validation:**
+   - Handled and tested live: Both `ChatInput.tsx` (UI button disabled on `!text.trim()`) and `useChat.ts` (`sendMessage` early return guard) reject empty strings, spaces, tabs, and newlines via button clicks and Enter key.
+2. **Comprehensive Empty States:**
+   - Handled and tested live: Verified that a fresh user account sees the "No conversations yet" directory prompt in `ConversationSidebar.tsx`, the welcome screen with action cards in `page.tsx` when no conversation is active, and the "No messages yet — say hi" prompt in `MessageList.tsx` for brand-new conversations.
+3. **Graceful Error Handling & Reconnection:**
+   - Handled and tested live: Added error cards with "Retry" buttons for failed conversation/message loads in `ConversationSidebar` and `MessageList`, red "Failed to send (Retry)" actions in `MessageBubble`, and an animated real-time reconnection banner in `page.tsx` during socket interruptions.

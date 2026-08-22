@@ -165,6 +165,46 @@ export function useChat({ currentUser }: UseChatProps) {
     [activeConversationId, currentUser]
   );
 
+  // 4b. Retry failed message
+  const retrySendMessage = useCallback(
+    async (failedMsg: Message): Promise<boolean> => {
+      const convId = failedMsg.conversation || activeConversationId;
+      if (!convId || !currentUser || !failedMsg.text.trim()) return false;
+
+      // Update status back to sending
+      setMessages((prev) =>
+        prev.map((m) =>
+          m._id === failedMsg._id || m.tempId === failedMsg.tempId
+            ? { ...m, status: "sending" as const }
+            : m
+        )
+      );
+
+      const res = await api.sendMessage(convId, failedMsg.text.trim());
+      if (res.data) {
+        const realMsg = res.data;
+        setMessages((prev) =>
+          prev.map((m) =>
+            m._id === failedMsg._id || m.tempId === failedMsg.tempId
+              ? { ...realMsg, status: "sent" as const, tempId: failedMsg.tempId }
+              : m
+          )
+        );
+        return true;
+      } else {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m._id === failedMsg._id || m.tempId === failedMsg.tempId
+              ? { ...m, status: "error" as const }
+              : m
+          )
+        );
+        return false;
+      }
+    },
+    [activeConversationId, currentUser]
+  );
+
   // 5. Select a conversation
   const selectConversation = useCallback((conversationId: string) => {
     setActiveConversationId(conversationId);
@@ -321,6 +361,8 @@ export function useChat({ currentUser }: UseChatProps) {
     error,
     selectConversation,
     sendMessage,
+    retrySendMessage,
+    loadMessages,
     loadOlderMessages,
     fetchConversations,
     setConversations,

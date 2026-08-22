@@ -5,7 +5,7 @@ import { Message, User, Conversation, GroupConversation } from "@/types";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import { formatDateSeparator, getSenderId } from "@/lib/utils";
 import { useSmartScroll } from "@/hooks/useSmartScroll";
-import { ChevronDown, Loader2, MessageSquare } from "lucide-react";
+import { ChevronDown, Loader2, MessageSquare, AlertCircle } from "lucide-react";
 
 interface MessageListProps {
   messages: Message[];
@@ -14,8 +14,11 @@ interface MessageListProps {
   isLoading: boolean;
   isLoadingMore: boolean;
   hasMore: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   onLoadOlder: () => void;
   searchHighlight?: string;
+  onRetryMessage?: (msg: Message) => void;
 }
 
 export function MessageList({
@@ -25,8 +28,11 @@ export function MessageList({
   isLoading,
   isLoadingMore,
   hasMore,
+  error,
+  onRetry,
   onLoadOlder,
   searchHighlight = "",
+  onRetryMessage,
 }: MessageListProps) {
   const isGroup = conversation.type === "group";
   const groupConv = isGroup ? (conversation as GroupConversation) : null;
@@ -87,6 +93,29 @@ export function MessageList({
           <Loader2 className="w-5 h-5 animate-spin" />
         </div>
         <p className="text-xs font-medium">Loading message history...</p>
+      </div>
+    );
+  }
+
+  if (error && messages.length === 0) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-muted-foreground">
+        <div className="w-14 h-14 rounded-3xl bg-rose-500/10 text-rose-500 flex items-center justify-center mb-3 border border-rose-500/20 shadow-sm">
+          <AlertCircle className="w-7 h-7" />
+        </div>
+        <h3 className="text-sm font-semibold text-foreground">Failed to load messages</h3>
+        <p className="text-xs text-muted-foreground max-w-xs mt-1">
+          {error || "Could not retrieve message history from server."}
+        </p>
+        {onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="mt-4 px-4 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-semibold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+          >
+            Retry Connection
+          </button>
+        )}
       </div>
     );
   }
@@ -165,6 +194,7 @@ export function MessageList({
                 senderUser={senderUser}
                 showSenderName={isGroup && !isSelf}
                 searchHighlight={searchHighlight}
+                onRetry={onRetryMessage}
               />
             </React.Fragment>
           );

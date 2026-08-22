@@ -14,6 +14,7 @@ import {
   Moon,
   LogOut,
   MessageSquare,
+  AlertCircle,
   X,
 } from "lucide-react";
 
@@ -22,6 +23,8 @@ interface ConversationSidebarProps {
   activeConversationId: string | null;
   currentUser: User | null;
   socketStatus: "connected" | "connecting" | "disconnected";
+  error?: string | null;
+  onRetry?: () => void;
   onSelectConversation: (id: string) => void;
   onOpenNewChat: () => void;
   onOpenNewGroup: () => void;
@@ -33,6 +36,8 @@ export function ConversationSidebar({
   activeConversationId,
   currentUser,
   socketStatus,
+  error,
+  onRetry,
   onSelectConversation,
   onOpenNewChat,
   onOpenNewGroup,
@@ -185,7 +190,26 @@ export function ConversationSidebar({
 
       {/* 3. Conversations List */}
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
-        {filteredConversations.length === 0 ? (
+        {error && conversations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-48 text-muted-foreground text-center p-4">
+            <div className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center mb-2 border border-rose-500/20">
+              <AlertCircle className="w-5 h-5" />
+            </div>
+            <p className="text-xs font-semibold text-foreground">Failed to load chats</p>
+            <p className="text-[11px] text-muted-foreground mt-1 max-w-[190px]">
+              {error || "Could not connect to server."}
+            </p>
+            {onRetry && (
+              <button
+                type="button"
+                onClick={onRetry}
+                className="mt-3 px-3 py-1.5 bg-primary text-white text-xs font-semibold rounded-xl hover:bg-primary-hover transition-colors shadow-sm cursor-pointer"
+              >
+                Retry
+              </button>
+            )}
+          </div>
+        ) : filteredConversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 text-muted-foreground text-center p-4">
             <div className="w-10 h-10 rounded-2xl bg-secondary/80 flex items-center justify-center text-muted-foreground mb-2">
               <MessageSquare className="w-5 h-5 opacity-50" />
@@ -200,7 +224,7 @@ export function ConversationSidebar({
               <button
                 type="button"
                 onClick={onOpenNewChat}
-                className="mt-3 text-xs text-primary font-medium hover:underline"
+                className="mt-3 text-xs text-primary font-medium hover:underline cursor-pointer"
               >
                 Search directory →
               </button>
