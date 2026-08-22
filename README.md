@@ -103,8 +103,8 @@ npm run build
 ### Part 1: API Documentation & Feature Implementation
 - **Standalone API Docs & Swagger:** Complete Markdown specification in [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md), interactive playground at `/docs`, and OpenAPI 3.0 JSON at [`/openapi.json`](https://home-assignment-smoky.vercel.app/openapi.json).
 - **Zero-Friction Auth:** Auto-registers new phone numbers or logs in existing numbers with JWT session recovery.
-- **Direct & Group Conversations:** Real-time search (`/api/users/search`) and multi-user group creator enforcing the backend $\ge 3$ member rule.
-- **Group Governance Drawer:** Admin promotion (`POST /conversations/:id/admins`), participant addition, group rename, and member departure.
+- **Direct & Group Conversations:** Real-time search (`/api/users/search`) and multi-user group creator enforcing the backend at least 3 members rule.
+- **Group Governance Drawer:** Admin promotion (`POST /api/conversations/:id/admins`), participant addition, group rename, and member departure.
 - **Smart Auto-Scroll (`useSmartScroll`):** Auto-scrolls on new messages by default; preserves scroll position when viewing history and displays an animated **"↓ X new messages"** pill.
 - **Upward Infinite Scroll & Deduplication:** Loads older pages with `before` cursor and client-side message deduplication.
 - **Audio Synthesizer:** Web Audio API synthesized chimes for sending, receiving, and audio note simulations (zero asset dependencies).

@@ -240,8 +240,8 @@ During rigorous live testing against `https://frontend-task-chatapp.onrender.com
 - **The Bug:** Server endpoints populate `sender` as an object `{ _id: "...", name: "..." }`. Comparing `message.sender === currentUser._id` evaluated to `false`, displaying the user's own messages on the left with a "ME" avatar.
 - **The Fix:** Created `getSenderId(sender)` in `utils.ts` to extract the string ID regardless of whether `sender` is an object or string ID.
 
-### 4. Group Minimum $\ge 3$ Member Constraint
-- **The Bug:** `POST /api/conversations/group` requires at least 3 total participants (creator + $\ge 2$ selected users).
+### 4. Group Minimum (At Least 3 Members) Constraint
+- **The Bug:** `POST /api/conversations/group` requires at least 3 total participants (creator + at least 2 selected users).
 - **The Fix:** Built validation in `NewGroupModal.tsx` requiring at least 2 participants before enabling the "Create Group" button.
 
 ### 5. Socket Room Subscription Synchronization
@@ -285,8 +285,8 @@ During rigorous live testing against `https://frontend-task-chatapp.onrender.com
 ## 8. Local Development, Build & Deployment Guide
 
 ### 8.1 Prerequisites
-- Node.js $\ge 18.18.0$ (or Node.js 20/22)
-- npm $\ge 9.0.0$
+- Node.js 18.18.0 or higher (e.g. Node.js 20 or 22)
+- npm 9.0.0 or higher
 
 ### 8.2 Installation & Setup
 

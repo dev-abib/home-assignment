@@ -1,8 +1,9 @@
 # Part 3: Thought Process & Architectural Write-up
 
 > **Candidate:** Md. Abib Ahmed Dipto  
-> **Repository:** https://github.com/dev-abib/home-assignment  
-> **Live Demo:** https://home-assignment-smoky.vercel.app/  
+> **Repository:** [https://github.com/dev-abib/home-assignment](https://github.com/dev-abib/home-assignment)  
+> **Live Frontend (Vercel):** [https://home-assignment-smoky.vercel.app/](https://home-assignment-smoky.vercel.app/)  
+> **Live Backend API (Render):** [https://frontend-task-chatapp.onrender.com](https://frontend-task-chatapp.onrender.com)  
 
 This document details the architectural decisions, design philosophies, AI tooling transparency, future extensions, and live API quirks encountered during the implementation of the **PulseChat Platform** (Parts 1 & 2).
 
@@ -11,26 +12,35 @@ This document details the architectural decisions, design philosophies, AI tooli
 ## 1. Architecture, Libraries & Approach (Part 1)
 
 ### 1.1 Technology Stack & Architectural Decisions
-- **Framework (Next.js 14 + React 18/19 + TypeScript):**  
-  We chose Next.js App Router for unified client-side interactivity, fast routing, type safety, and seamless deployment to Vercel/Netlify.
-- **Real-Time Dual-Channel Engine (Socket.io + REST):**  
+
+#### Framework & Language
+- **Next.js 14.2 (App Router) + React 18.3 + TypeScript 5.7:**  
+  We chose Next.js App Router for unified client-side interactivity, fast routing, strict compile-time type safety, and seamless deployment to Vercel (frontend) paired with the live Render backend.
+
+#### Real-Time Dual-Channel Engine
+- **Socket.io Client 4.8 + REST (`/api/*`):**  
   A dual-pipeline approach was adopted:
-  - **Socket.io Client** maintains a persistent bi-directional connection to root origin for instant zero-latency message broadcast (`message:new`, `conversation:updated`) and sending (`message:send`).
-  - **REST Client (`/api/*`)** handles initial loads, historical paging (`before` cursor), user search, and acts as an immediate fallback if WebSocket reconnects.
-- **Smart Scroll Hook (`useSmartScroll`):**  
+  - **Socket.io Client** maintains a persistent bi-directional connection to the root origin for instant zero-latency message broadcasts (`message:new`, `conversation:updated`) and room subscriptions (`conversation:join`).
+  - **REST Client (`/api/*`)** handles initial loads, historical paging (`before` cursor), user search, and deterministic message dispatch via `POST /api/messages` to avoid race conditions.
+
+#### Smart Scroll Continuity Hook
+- **`useSmartScroll.ts`:**  
   To solve the critical requirement of auto-scrolling by default without annoying users who scrolled up to read earlier history, we engineered a dedicated container observer:
   - Tracks distance from scroll bottom with a 120px threshold.
   - Automatically scrolls down on outgoing messages and when already at the bottom.
   - Suppresses auto-scroll when user is scrolled up and displays an animated floating **"↓ X new messages"** pill.
   - Preserves scroll height offsets (`scrollHeight - previousScrollHeight`) when prepending older pages so the user's viewport never jerks.
-- **Web Audio API Sound Synthesis (`sounds`):**  
+
+#### Web Audio API Sound Synthesis
+- **`sound.ts`:**  
   Instead of relying on external audio asset files (which risk broken CDN links, CORS issues, or slow network downloads), we built a lightweight synthesizer using the native browser Web Audio API oscillator nodes for outgoing chimes and incoming notification pings.
 
 ### 1.2 Trade-offs Considered
+
 | Decision | Chosen Approach | Alternative Considered | Trade-off Rationale |
 | :--- | :--- | :--- | :--- |
 | **State Management** | Custom Hooks + React Context (`useChat`, `AuthContext`) | Redux Toolkit / Zustand | Reduced bundle size and complexity; React Context + custom hooks provide clean, isolated reactivity without boilerplate overhead for this application scale. |
-| **Styling System** | Tailwind CSS + CSS Variables (Hues) | Vanilla CSS Modules | Rapid prototyping with token-level consistency, dark/light theme switching via CSS variables, and zero runtime CSS overhead. |
+| **Styling System** | Tailwind CSS v4 + CSS Variables (Hues) | Vanilla CSS Modules | Rapid prototyping with token-level consistency, dark/light theme switching via CSS variables, and zero runtime CSS overhead. |
 | **Message Deduplication** | In-memory ID Map / Set Filtering | Strict Array Indexing | Eliminates backend boundary duplication bugs during cursor pagination. |
 
 ---
@@ -41,7 +51,7 @@ This document details the architectural decisions, design philosophies, AI tooli
 - **Color Palette & Glassmorphism:** Deep space background (`hsl(224, 71%, 4%)`) paired with high-contrast electric indigo/violet gradients, frosted glass cards (`backdrop-filter: blur(16px)`), and crisp typography hierarchy.
 - **Interactive Live Simulator (Bonus Addition):**  
   Rather than presenting static screenshots or mockups, we created an embedded, interactive 2-user sandbox right on the landing page. Visitors can switch personas ("Alex" and "Taylor"), send real messages, trigger simulated audio notes, observe live typing indicators, and test the smart scroll behavior directly before signing in.
-- **Clarity & Transparency:** Included an interactive API explorer (`/docs`) where reviewers can execute live HTTP requests against the backend and copy curl commands with 1 click.
+- **Clarity & Transparency:** Included an interactive API explorer (`/docs`) where reviewers can execute live HTTP requests against the backend and copy cURL commands with 1 click.
 
 ---
 
@@ -53,16 +63,16 @@ In compliance with the assignment instructions, below is an honest and complete 
 - **Antigravity AI Assistant (Google DeepMind):** Used for rapid exploration, scripting automated API probe test harnesses, boilerplate generation, and edge-case validation.
 
 ### 3.2 What Was Automated / Drafted with AI
-- Initial drafting of the OpenAPI/Markdown documentation structure in `API_DOCUMENTATION.md`.
+- Initial drafting of the OpenAPI/Markdown documentation structure in `API_DOCUMENTATION.md` and `postman_collection.json`.
 - Generating synthetic Web Audio API frequency curves for audio chimes.
-- Automated API probing scripts (`probe_all_endpoints.ps1`) to reverse-engineer exact response shapes and error schemas from the Render server.
+- Automated API probing scripts to reverse-engineer exact response shapes and error schemas from the Render server.
 
 ### 3.3 What Was Hand-Crafted, Adjusted, or Rejected
 - **Rejected Naive Auto-Scroll:** AI initially suggested simple `scrollIntoView()` on every message update. We rejected this because it violates the core requirement of not forcing scroll when the user is reviewing history. We hand-coded the `useSmartScroll` threshold calculations (120px proximity window) and height offset preservation (`newScrollHeight - previousScrollHeight`) for upward paging.
 - **Identified & Fixed Socket Payload Discrepancy (`id` vs `_id`):** When inspecting live network traffic, we discovered the Render backend socket emitted `{ id: "..." }` while database documents used `{ _id: "..." }`, which caused React state to overwrite incoming messages (`undefined === undefined`). We hand-coded payload normalization in `socket.ts` and strict non-empty deduplication in `useChat.ts`.
 - **Engineered Deterministic Message Delivery:** Rejected relying purely on socket emit acknowledgments (which returned `{ ok: true }` without payload). We routed outgoing sends through `api.sendMessage()` for ~200ms confirmation, reconciliation from temporary IDs to real database IDs, and added an interactive **"Failed to send. Retry"** mechanism.
 - **Corrected URL Routing Paths:** AI initial assumptions attempted to call REST endpoints at root origin; our probe scripts verified that REST is mounted at `/api/*`, while `/health` and `/socket.io` are at root origin.
-- **Hand-Coded Group Creation Validation:** Verified that the API requires $\ge 3$ members, adding multi-select participant chip management and validation warnings before calling `POST /api/conversations/group`.
+- **Hand-Coded Group Creation Validation:** Verified that the API requires at least 3 members, adding multi-select participant chip management and validation warnings before calling `POST /api/conversations/group`.
 - **Deduplication Logic:** Hand-crafted ID map filtering to resolve the inclusive boundary cursor quirk in `GET /api/conversations/{id}/messages`.
 
 ---
@@ -86,11 +96,11 @@ During our systematic probing of `https://frontend-task-chatapp.onrender.com`, w
 - **Resolution:** Centralized API client base URL to `https://frontend-task-chatapp.onrender.com/api` and socket client URL to root origin.
 
 ### 2. Group Minimum Participant Rule
-- **Observation:** Calling `POST /api/conversations/group` with 1 participant in `participantIds` returns a `400 Bad Request` validation error: `"a group needs at least 3 members"`. The backend counts creator (1) + `participantIds` ($\ge 2$).
+- **Observation:** Calling `POST /api/conversations/group` with 1 participant in `participantIds` returns a `400 Bad Request` validation error: `"a group needs at least 3 members"`. The backend counts creator (1) + `participantIds` (at least 2).
 - **Resolution:** Added client-side validation in `NewGroupModal` requiring at least 2 other participants to be selected, with live counter badges showing "X more needed".
 
 ### 3. Cursor Pagination Inclusive Boundary Duplication
-- **Observation:** When requesting older messages via `GET /api/conversations/{id}/messages?limit=2&before={oldestMessageId}`, the backend query uses inclusive comparison ($\le$), returning `{oldestMessageId}` again in the next page.
+- **Observation:** When requesting older messages via `GET /api/conversations/{id}/messages?limit=2&before={oldestMessageId}`, the backend query uses inclusive comparison (using <=, not <), returning `{oldestMessageId}` again in the next page.
 - **Resolution:** In `useChat`, we implemented Map/Set deduplication based on `_id` before prepending older messages to the state:
   ```typescript
   setMessages((prev) => {
