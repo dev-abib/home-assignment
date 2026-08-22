@@ -5,37 +5,23 @@ import Link from "next/link";
 import {
   ArrowRight,
   Zap,
-  ShieldCheck,
   Users,
   MessageSquare,
   Radio,
   Send,
   Terminal,
-  CheckCircle2,
   Lock,
   Layers,
-  Flame,
-  Volume2,
-  Smile,
-  Mic,
   ChevronRight,
-  Play,
-  Pause,
-  Copy,
-  Star,
   Activity,
   Code2,
 } from "lucide-react";
-import { sounds } from "@/lib/sound";
-import confetti from "canvas-confetti";
-import { toast } from "sonner";
 
 interface SimMessage {
   id: string;
   sender: "alex" | "taylor";
   text: string;
   time: string;
-  isVoice?: boolean;
 }
 
 export default function LandingPage() {
@@ -44,19 +30,19 @@ export default function LandingPage() {
     {
       id: "1",
       sender: "alex",
-      text: "Hey Taylor! Just launched the new real-time group governance features 🚀",
+      text: "Hey Taylor! Real-time group governance and messaging are live 🚀",
       time: "10:42 AM",
     },
     {
       id: "2",
       sender: "taylor",
-      text: "Awesome! Testing the smart scroll auto-continuity right now.",
+      text: "Awesome! Testing the smart scroll auto-continuity and instant WebSocket delivery.",
       time: "10:43 AM",
     },
     {
       id: "3",
       sender: "alex",
-      text: "Notice how scrolling up pauses auto-scroll with a floating unread pill?",
+      text: "Notice how scrolling up pauses auto-scroll with a floating unread indicator?",
       time: "10:43 AM",
     },
   ]);
@@ -79,9 +65,8 @@ export default function LandingPage() {
 
     setSimMessages((prev) => [...prev, newMsg]);
     setSimInput("");
-    sounds.playSend();
 
-    // Auto reply simulation after 1.2s
+    // Auto reply simulation after 1s
     const replyingPersona = activePersona === "alex" ? "taylor" : "alex";
     setIsTyping(true);
 
@@ -104,29 +89,7 @@ export default function LandingPage() {
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
-      sounds.playReceive();
-    }, 1100);
-  };
-
-  const handleSimVoiceNote = () => {
-    const newMsg: SimMessage = {
-      id: String(Date.now()),
-      sender: activePersona,
-      text: "[Voice Note] 0:14",
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      isVoice: true,
-    };
-    setSimMessages((prev) => [...prev, newMsg]);
-    sounds.playSend();
-    toast.success("Synthesized audio voice note added to simulator");
-  };
-
-  const triggerConfetti = () => {
-    confetti({
-      particleCount: 75,
-      spread: 70,
-      origin: { y: 0.6 },
-    });
+    }, 1000);
   };
 
   // Scroll simulator to bottom
@@ -140,9 +103,9 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 selection:text-primary overflow-x-hidden">
       {/* 1. Dynamic Ambient Background Glows */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-primary/25 via-indigo-600/20 to-purple-600/15 rounded-full blur-[140px] animate-pulse-glow" />
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-primary/20 via-indigo-600/15 to-purple-600/10 rounded-full blur-[140px] animate-pulse-glow" />
         <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[140px]" />
-        <div className="absolute bottom-20 -right-40 w-[600px] h-[600px] bg-purple-600/15 rounded-full blur-[160px]" />
+        <div className="absolute bottom-20 -right-40 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[160px]" />
       </div>
 
       {/* 2. Top Navigation */}
@@ -156,7 +119,7 @@ export default function LandingPage() {
           </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8 text-xs font-medium text-muted-foreground">
+        <div className="hidden md:flex items-center gap-8 text-xs font-semibold text-muted-foreground">
           <a href="#simulator" className="hover:text-foreground transition-colors">
             Live Sandbox
           </a>
@@ -193,7 +156,7 @@ export default function LandingPage() {
       <section className="relative z-10 max-w-5xl mx-auto px-6 pt-12 pb-20 text-center">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/25 text-primary text-xs font-semibold mb-6 shadow-sm animate-fade-in">
-          <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span>Real-Time WebSocket & REST Architecture</span>
         </div>
 
@@ -214,7 +177,6 @@ export default function LandingPage() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             href="/chat"
-            onClick={triggerConfetti}
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-primary via-indigo-600 to-purple-600 hover:from-primary-hover hover:to-purple-700 text-white text-sm font-bold shadow-xl shadow-primary/30 transition-all hover:scale-105 active:scale-95"
           >
             <MessageSquare className="w-4 h-4" />
@@ -250,18 +212,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 4. Live Interactive Simulator Sandbox (Original Bonus Feature) */}
+      {/* 4. Live Interactive Simulator Sandbox */}
       <section id="simulator" className="relative z-10 max-w-5xl mx-auto px-6 py-16">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-1.5 text-xs font-bold text-primary uppercase tracking-wider mb-2">
             <Zap className="w-4 h-4" />
-            <span>Interactive Sandbox</span>
+            <span>Interactive Preview</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
-            Try the Live Chat Simulator
+            Try the Live Chat Sandbox
           </h2>
           <p className="text-sm text-muted-foreground max-w-md mx-auto mt-2">
-            Experience real-time socket events, smart scroll, audio synthesis, and interactive reactions right on this page.
+            Experience real-time messaging, simulated typing indicators, and seamless auto-scroll right on this page.
           </p>
         </div>
 
@@ -273,7 +235,7 @@ export default function LandingPage() {
               <span className="w-3 h-3 rounded-full bg-rose-500" />
               <span className="w-3 h-3 rounded-full bg-amber-500" />
               <span className="w-3 h-3 rounded-full bg-emerald-500" />
-              <span className="text-xs font-semibold text-foreground ml-2">Live Demo Channel</span>
+              <span className="text-xs font-semibold text-foreground ml-2">Sandbox Channel</span>
             </div>
 
             {/* Persona Switcher */}
@@ -288,7 +250,7 @@ export default function LandingPage() {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Alex (You)
+                Alex
               </button>
               <button
                 type="button"
@@ -332,14 +294,7 @@ export default function LandingPage() {
                         isSelf ? "bubble-self" : "bubble-other border border-border/40"
                       }`}
                     >
-                      {msg.isVoice ? (
-                        <div className="flex items-center gap-2 py-0.5">
-                          <Play className="w-3.5 h-3.5 fill-current" />
-                          <span className="font-mono">Voice Note (0:14)</span>
-                        </div>
-                      ) : (
-                        <p>{msg.text}</p>
-                      )}
+                      <p>{msg.text}</p>
                       <p
                         className={`text-[9px] mt-1 text-right ${
                           isSelf ? "text-white/70" : "text-muted-foreground"
@@ -370,15 +325,6 @@ export default function LandingPage() {
 
           {/* Simulator Input Footer */}
           <form onSubmit={handleSimSend} className="p-3 border-t border-border/80 bg-card flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleSimVoiceNote}
-              className="p-2 rounded-xl text-muted-foreground hover:text-primary hover:bg-secondary transition-colors"
-              title="Send Voice Note Demo"
-            >
-              <Mic className="w-4 h-4" />
-            </button>
-
             <input
               type="text"
               placeholder={`Send message as ${activePersona === "alex" ? "Alex" : "Taylor"}...`}
@@ -391,6 +337,7 @@ export default function LandingPage() {
               type="submit"
               disabled={!simInput.trim()}
               className="p-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white disabled:opacity-40 transition-all active:scale-95 shadow-sm"
+              title="Send Message"
             >
               <Send className="w-3.5 h-3.5" />
             </button>
