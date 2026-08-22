@@ -249,6 +249,22 @@ During rigorous live testing against `https://frontend-task-chatapp.onrender.com
 - **The Bug:** When opening a conversation, without emitting `conversation:join`, the socket connection was not added to the conversation room.
 - **The Fix:** Added `socketService.joinConversation(conversationId)` whenever active conversation changes in `useChat.ts`.
 
+### 6. Empty & Whitespace Message Validation
+- **Requirement:** Prevent sending empty messages or strings containing only whitespace (spaces, tabs, newlines).
+- **The Implementation:** Guarded on two independent layers:
+  1. **UI Layer (`ChatInput.tsx`):** The send button is dynamically disabled when `!text.trim()`, and pressing <kbd>Enter</kbd> ignores whitespace-only strings.
+  2. **Hook Layer (`useChat.ts`):** `sendMessage(text)` checks `if (!text.trim()) return false;` before creating optimistic messages or calling the API.
+
+### 7. Comprehensive Multi-Scenario Empty States
+- **Zero Conversations:** When a brand-new user has no chats, `ConversationSidebar.tsx` renders a dedicated empty state prompting them to start a direct message or create a group with a 1-click directory search button.
+- **No Conversation Selected:** When no chat is active, `page.tsx` displays an onboarding hub with quick-start action cards for Direct Messages and Group Channels.
+- **Zero Messages in Conversation:** Newly created conversations render a "No messages yet — say hi!" illustration in `MessageList.tsx`.
+
+### 8. Visible Error States, Message Resend & Socket Reconnection
+- **Failed Message Send (`MessageBubble.tsx`):** If `POST /api/messages` fails, the optimistic bubble turns into a red error container with a visible **"Failed to send. Retry"** action powered by `retrySendMessage()`.
+- **Failed Conversation/Message Fetch (`MessageList.tsx` / `ConversationSidebar.tsx`):** Renders visible error cards with a **"Retry Connection"** button instead of an infinite loading spinner.
+- **Socket Disconnection Alert (`page.tsx`):** When `socketStatus === "disconnected"`, an animated amber banner notifies the user that real-time sync is interrupted and messages are being delivered via HTTP backup.
+
 ---
 
 ## 7. Technology Stack & Dependency Matrix
@@ -318,6 +334,9 @@ npm run build
 | **ESLint Compliance** | `npm run lint` | **PASSED** | `✔ No ESLint warnings or errors` |
 | **TypeScript Compilation** | `npm run build` | **PASSED** | `✓ Compiled successfully (7/7 static routes)` |
 | **Security Sanitization** | Secret scan | **PASSED** | No hardcoded credentials; `.env.example` templates created |
+| **Empty & Whitespace Validation** | Automated test suite | **PASSED** | Blocked `""`, `"   "`, `"\t\n "` at UI and hook levels |
+| **Empty States (Fresh Account)** | Live user simulation | **PASSED** | Verified sidebar, chat area, and message list empty states |
+| **Error Handling & Retries** | Fault injection test | **PASSED** | Verified failed send retry buttons, load error screens, and reconnect banner |
 | **End-to-End Browser Flow** | Browser Automation Subagent | **PASSED** | Tested landing page, login, direct chat, group creation, group rename, and theme toggle |
 | **Multi-User Real-Time Sync** | Live socket simulator | **PASSED** | Verified bidirectional messaging and real-time synchronization between 2 concurrent users |
 | **Deployment Status** | Vercel + Render | **ACTIVE** | [https://home-assignment-smoky.vercel.app/](https://home-assignment-smoky.vercel.app/) |
