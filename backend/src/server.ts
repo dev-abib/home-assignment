@@ -13,7 +13,7 @@ const app = express();
 const server = http.createServer(app);
 
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://abibdipto_db_user:1234@cluster0.c3qrv2g.mongodb.net/pulse_chat?retryWrites=true&w=majority";
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/pulse_chat";
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
 
 // Configure Socket.io

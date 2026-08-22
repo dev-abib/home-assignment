@@ -25,7 +25,7 @@
 ## 🏗️ Clean Project Architecture & Structure
 
 ```
-e:\task/
+./
 │
 ├── 📂 frontend/                    # DEDICATED NEXT.JS 14 FRONTEND APPLICATION
 │   ├── 📂 src/

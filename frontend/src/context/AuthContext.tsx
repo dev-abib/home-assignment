@@ -22,6 +22,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const logout = useCallback(() => {
+    setToken(null);
+    setUserState(null);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("chat_token");
+      localStorage.removeItem("chat_user");
+    }
+    socketService.disconnect();
+  }, []);
+
   // Restore session from localStorage on mount
   useEffect(() => {
     async function restoreSession() {
@@ -60,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     restoreSession();
-  }, []);
+  }, [logout]);
 
   const login = useCallback(async (phone: string, name: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
@@ -83,16 +93,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
       return { success: false, error: res.error || "Failed to log in" };
     }
-  }, []);
-
-  const logout = useCallback(() => {
-    setToken(null);
-    setUserState(null);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("chat_token");
-      localStorage.removeItem("chat_user");
-    }
-    socketService.disconnect();
   }, []);
 
   const setUser = useCallback((updatedUser: User) => {

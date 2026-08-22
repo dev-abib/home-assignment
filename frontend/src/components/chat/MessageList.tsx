@@ -57,12 +57,17 @@ export function MessageList({
     lastMessageCountRef.current = messages.length;
   }, [messages, currentUser, handleNewMessage]);
 
+  const prevConvIdRef = useRef<string | null>(null);
+
   // Initial scroll to bottom on conversation switch
   useEffect(() => {
     if (!isLoading && messages.length > 0) {
-      scrollToBottom("auto");
+      if (prevConvIdRef.current !== conversation._id) {
+        scrollToBottom("auto");
+        prevConvIdRef.current = conversation._id;
+      }
     }
-  }, [conversation._id, isLoading, scrollToBottom]);
+  }, [conversation._id, isLoading, messages.length, scrollToBottom]);
 
   // Map participant objects for group sender names
   const participantMap = React.useMemo(() => {
