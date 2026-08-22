@@ -128,34 +128,27 @@ export function useChat({ currentUser }: UseChatProps) {
         )
       );
 
-      // Attempt send via Socket.io first
-      const sentOverSocket = socketService.sendMessage(activeConversationId, trimmed, (ack) => {
-        if ("status" in ack && ack.status === "ok") {
-          const realMsg = ack.message;
-          setMessages((prev) =>
-            prev.map((m) => (m.tempId === tempId || m._id === tempId ? { ...realMsg, status: "sent" } : m))
-          );
-        } else if ("error" in ack) {
-          setMessages((prev) =>
-            prev.map((m) => (m.tempId === tempId || m._id === tempId ? { ...m, status: "error" } : m))
-          );
-        }
-      });
-
-      if (!sentOverSocket) {
-        // Fallback to REST API
-        const res = await api.sendMessage(activeConversationId, trimmed);
-        if (res.data) {
-          const realMsg = res.data;
-          setMessages((prev) =>
-            prev.map((m) => (m.tempId === tempId || m._id === tempId ? { ...realMsg, status: "sent" } : m))
-          );
-        } else {
-          setMessages((prev) =>
-            prev.map((m) => (m.tempId === tempId || m._id === tempId ? { ...m, status: "error" } : m))
-          );
-          return false;
-        }
+      // Dispatch message to backend API (Render backend automatically broadcasts to Socket.io)
+      const res = await api.sendMessage(activeConversationId, trimmed);
+      if (res.data) {
+        const realMsg = res.data;
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.tempId === tempId || m._id === tempId
+              ? { ...realMsg, status: "sent" as const, tempId }
+              : m
+          )
+        );
+        return true;
+      } else {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.tempId === tempId || m._id === tempId
+              ? { ...m, status: "error" as const }
+              : m
+          )
+        );
+        return false;
       }
 
       return true;
