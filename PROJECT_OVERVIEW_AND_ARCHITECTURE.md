@@ -4,6 +4,7 @@
 > **Repository:** [https://github.com/dev-abib/home-assignment](https://github.com/dev-abib/home-assignment)  
 > **Live Web Application (Vercel):** [https://home-assignment-smoky.vercel.app/](https://home-assignment-smoky.vercel.app/)  
 > **Live Backend API (Render):** [https://frontend-task-chatapp.onrender.com](https://frontend-task-chatapp.onrender.com)  
+> **Live Swagger Documentation (Render):** [https://frontend-task-chatapp.onrender.com/docs/](https://frontend-task-chatapp.onrender.com/docs/)  
 > **API Health Check:** [https://frontend-task-chatapp.onrender.com/health](https://frontend-task-chatapp.onrender.com/health)  
 
 ---
@@ -193,8 +194,10 @@ home-assignment/
 
 ### 4.3 Part 3: API Explorer & OpenAPI Documentation (`/docs`)
 - **Interactive Live API Console:** Test all REST endpoints (`/api/auth/login`, `/api/conversations`, `/api/messages`, `/api/users/search`) directly from the browser with live request execution against the Render backend.
+- **Live Swagger Documentation (Render):** [https://frontend-task-chatapp.onrender.com/docs/](https://frontend-task-chatapp.onrender.com/docs/) for official testable Swagger UI.
 - **1-Click cURL Generator:** Copy production-ready cURL commands with authentication headers.
 - **Standardized OpenAPI 3.0 File:** `openapi.json` ready for Postman / Swagger UI import.
+- **Testable Postman Collection:** `postman_collection.json` with pre-configured variables and token automation.
 
 ---
 

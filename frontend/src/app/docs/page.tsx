@@ -16,6 +16,7 @@ import {
   ArrowRight,
   Loader2,
   Download,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -312,6 +313,17 @@ export default function DocsPage() {
         </div>
 
         <div className="flex items-center gap-2.5">
+          <a
+            href="https://frontend-task-chatapp.onrender.com/docs/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-xs font-semibold text-emerald-400 transition-all"
+            title="Open live interactive Swagger UI hosted on Render"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Swagger UI (Render)</span>
+          </a>
+
           <a
             href="/openapi.json"
             target="_blank"

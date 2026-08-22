@@ -4,6 +4,7 @@
 > **Base REST URL:** `https://frontend-task-chatapp.onrender.com/api`  
 > **WebSocket URL:** `https://frontend-task-chatapp.onrender.com` (Socket.io)  
 > **Interactive API Explorer:** [/docs](https://home-assignment-smoky.vercel.app/docs)  
+> **Live Swagger Documentation (Render):** [https://frontend-task-chatapp.onrender.com/docs/](https://frontend-task-chatapp.onrender.com/docs/)  
 > **OpenAPI 3.0 Specification:** [openapi.json](./openapi.json)  
 > **Postman Testable Collection:** [postman_collection.json](./postman_collection.json)  
 > **Author:** Md. Abib Ahmed Dipto (Frontend Candidate Deliverable)  

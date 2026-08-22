@@ -14,7 +14,9 @@
 | **Part 1 — Chat Application** | [**`https://home-assignment-smoky.vercel.app/chat`**](https://home-assignment-smoky.vercel.app/chat) | Full 1-to-1 & group chat with smart auto-scroll & Web Audio chimes |
 | **Part 1 — Login / Auto-Register** | [**`https://home-assignment-smoky.vercel.app/login`**](https://home-assignment-smoky.vercel.app/login) | Phone + name auto-registration authentication |
 | **Part 1 — Interactive API Explorer** | [**`https://home-assignment-smoky.vercel.app/docs`**](https://home-assignment-smoky.vercel.app/docs) | In-app API test console with real server requests & cURL generator |
+| **Live Swagger UI Documentation** | [**`https://frontend-task-chatapp.onrender.com/docs/`**](https://frontend-task-chatapp.onrender.com/docs/) | Official interactive Swagger UI testable documentation on Render |
 | **Part 1 — OpenAPI 3.0 / Swagger JSON** | [**`https://home-assignment-smoky.vercel.app/openapi.json`**](https://home-assignment-smoky.vercel.app/openapi.json) | Downloadable standard OpenAPI 3.0 / Swagger JSON spec |
+| **Testable Postman Collection** | [**`https://home-assignment-smoky.vercel.app/postman_collection.json`**](https://home-assignment-smoky.vercel.app/postman_collection.json) | 1-click importable Postman / Bruno API test collection |
 | **Master Architecture Guide** | [`PROJECT_OVERVIEW_AND_ARCHITECTURE.md`](./PROJECT_OVERVIEW_AND_ARCHITECTURE.md) | **Deep-dive on what was built, how it was built, full folder guide & fixes** |
 | **Part 1 — Standalone API Docs** | [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md) | Formal specification of all REST & WebSocket endpoints |
 | **Part 3 — Thought Process Write-up** | [`THOUGHT_PROCESS.md`](./THOUGHT_PROCESS.md) | Architectural rationale, AI transparency, and live API quirks |
