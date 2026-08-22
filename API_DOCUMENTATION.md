@@ -57,11 +57,12 @@ interface User {
 interface Message {
   _id: string;          // Unique Message ObjectID
   conversation: string; // Target Conversation ObjectID
-  sender: string;       // Sender User ObjectID
+  sender: string | { _id: string; name: string; phone?: string }; // Sender User ObjectID or populated User object
   text: string;         // Message body content (non-empty string)
   createdAt: string;    // ISO 8601 creation timestamp
 }
 ```
+*Note on Sender Representation:* `POST /api/messages` and `GET /api/conversations/:id/messages` return `sender` as a string ObjectID (`string`). In certain populated responses or group events, `sender` can be an object `{ _id, name, phone }`. Client integrations should normalize `sender` using a helper like `getSenderId(sender)`.
 
 ### Direct Conversation Object
 ```typescript
@@ -397,8 +398,20 @@ Retrieves chronological message history with pagination. Messages are returned i
 
 ### Client → Server Events
 
+#### `conversation:join`
+Emitted by the client upon selecting or opening an active conversation to join the dedicated Socket.io room for real-time broadcast delivery.
+```typescript
+socket.emit("conversation:join", conversationId);
+```
+
+#### `conversation:leave`
+Emitted by the client when switching away or unmounting an active conversation room.
+```typescript
+socket.emit("conversation:leave", conversationId);
+```
+
 #### `message:send`
-Sends a message via WebSocket with optional server acknowledgment.
+Sends a message via WebSocket. The live Render server returns a simple `{ ok: true }` confirmation acknowledgment.
 ```typescript
 socket.emit(
   "message:send",
@@ -406,11 +419,12 @@ socket.emit(
     conversationId: "6a8883dbe5d6aac975237832",
     text: "Live message over socket"
   },
-  (ackResponse: { status: "ok"; message: Message } | { error: string }) => {
-    // Ack handler
+  (ackResponse: { ok: boolean }) => {
+    console.log("Server received message:", ackResponse.ok);
   }
 );
 ```
+*Note on Message Confirmation Architecture:* Because the socket `message:send` acknowledgment returns `{ ok: true }` without the created message document, the PulseChat frontend dispatches message sends via `POST /api/messages` to deterministically receive the full MongoDB document (~200ms), reconcile temporary IDs to real database IDs, and handle retry states if offline, while relying on Socket.io for receiving incoming broadcast events (`message:new`).
 
 ---
 

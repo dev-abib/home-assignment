@@ -68,8 +68,11 @@
             "example": "6a8883dbe5d6aac975237832"
           },
           "sender": {
-            "type": "string",
-            "example": "6a8883d9e5d6aac97523781a"
+            "oneOf": [
+              { "type": "string", "example": "6a8883d9e5d6aac97523781a" },
+              { "$ref": "#/components/schemas/User" }
+            ],
+            "description": "User ObjectID string or populated User profile object"
           },
           "text": {
             "type": "string",

@@ -270,7 +270,8 @@ During rigorous live testing against `https://frontend-task-chatapp.onrender.com
 
 | Category | Technology / Library | Version | Purpose |
 | :--- | :--- | :--- | :--- |
-| **Framework** | Next.js (App Router) | `14.2.23` | React 18 production framework, routing, and fast SSR |
+| **Framework** | Next.js (App Router) | `14.2.23` | React production web framework, routing, and fast SSR |
+| **UI Library** | React & React DOM | `18.3.1` | Component model, concurrent features, and client state hooks |
 | **Language** | TypeScript | `5.7.3` | End-to-end static typing and interface contracts |
 | **Styling** | Tailwind CSS | `4.0.0` | Utility-first design system with CSS custom properties |
 | **Icons** | Lucide React | `0.475.0` | Modern, consistent iconography |
