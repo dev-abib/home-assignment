@@ -458,26 +458,33 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 7. Footer CTA */}
-      <footer className="relative z-10 max-w-7xl mx-auto px-6 py-12 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+      {/* 7. Footer */}
+      <footer className="relative z-10 max-w-7xl mx-auto px-6 py-10 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-lg bg-primary text-white flex items-center justify-center">
             <MessageSquare className="w-3.5 h-3.5" />
           </div>
-          <span className="font-bold text-foreground">PulseChat Platform</span>
-          <span>· Candidate Assignment Deliverable</span>
+          <span className="font-bold text-foreground">PulseChat</span>
         </div>
 
-        <div className="flex items-center gap-6">
-          <Link href="/chat" className="hover:text-primary transition-colors">
-            Chat App
+        <div className="flex items-center gap-6 font-medium">
+          <Link href="/chat" className="hover:text-foreground transition-colors">
+            Workspace
           </Link>
-          <Link href="/docs" className="hover:text-primary transition-colors">
-            API Documentation
+          <Link href="/docs" className="hover:text-foreground transition-colors">
+            API Explorer
           </Link>
-          <Link href="/login" className="hover:text-primary transition-colors">
+          <Link href="/login" className="hover:text-foreground transition-colors">
             Sign In
           </Link>
+          <a
+            href="https://github.com/dev-abib/home-assignment"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground transition-colors"
+          >
+            GitHub
+          </a>
         </div>
       </footer>
     </div>

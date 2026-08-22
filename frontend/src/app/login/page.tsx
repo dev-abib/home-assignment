@@ -243,8 +243,23 @@ export default function LoginPage() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center text-xs text-muted-foreground max-w-6xl mx-auto w-full z-10">
-        <p>© 2026 PulseChat Platform · Built with Next.js, TypeScript & Socket.io</p>
+      <footer className="text-center text-xs text-muted-foreground max-w-6xl mx-auto w-full z-10 flex items-center justify-center gap-4">
+        <Link href="/" className="hover:text-foreground transition-colors">
+          Home
+        </Link>
+        <span>·</span>
+        <Link href="/docs" className="hover:text-foreground transition-colors">
+          API Specs
+        </Link>
+        <span>·</span>
+        <a
+          href="https://github.com/dev-abib/home-assignment"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-foreground transition-colors"
+        >
+          GitHub
+        </a>
       </footer>
     </div>
   );
