@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Conversation, User, DirectConversation, GroupConversation } from "@/types";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
-import { formatConversationDate } from "@/lib/utils";
+import { formatConversationDate, getSenderId } from "@/lib/utils";
 import { useTheme } from "@/context/ThemeContext";
 import {
   MessageSquarePlus,
@@ -215,7 +215,7 @@ export function ConversationSidebar({
             let otherUser = directConv?.participant;
             if (!otherUser && Array.isArray(directConv?.participants)) {
               const found = directConv.participants.find(
-                (p) => typeof p === "object" && p !== null && (p as User)._id !== currentUser?._id
+                (p) => typeof p === "object" && p !== null && getSenderId(p) !== currentUser?._id
               );
               if (found && typeof found === "object") otherUser = found as User;
             }
