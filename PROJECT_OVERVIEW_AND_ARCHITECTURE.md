@@ -105,7 +105,7 @@ home-assignment/
 │   └── tsconfig.json              # Backend TypeScript compiler configuration
 │
 ├── frontend/                      # Next.js 14 App Router Frontend
-│   ├── public/                    # Static public assets (openapi.json)
+│   ├── public/                    # Static public assets (openapi.json, postman_collection.json)
 │   ├── src/
 │   │   ├── app/                   # App Router Pages & Layouts
 │   │   │   ├── chat/              # Chat application workspace (/chat)
@@ -157,9 +157,9 @@ home-assignment/
 │   ├── postcss.config.mjs         # PostCSS configuration
 │   └── tsconfig.json              # Frontend TypeScript compiler configuration
 │
-├── docs/                          # Additional documentation assets
 ├── API_DOCUMENTATION.md           # Full Markdown API Reference with curl examples
 ├── openapi.json                   # OpenAPI 3.0.3 specification schema
+├── postman_collection.json        # Testable Postman / Bruno API test collection
 ├── README.md                      # Primary project README and quickstart guide
 ├── THOUGHT_PROCESS.md             # Thought process, design choices & AI transparency
 ├── package.json                   # Root monorepo workspace scripts

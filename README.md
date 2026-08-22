@@ -44,7 +44,8 @@
 │   │   ├── 📂 context/             # AuthContext, ThemeContext
 │   │   └── 📂 types/               # TypeScript interfaces
 │   ├── 📂 public/
-│   │   └── 📄 openapi.json         # Static OpenAPI 3.0 / Swagger specification
+│   │   ├── 📄 openapi.json         # Static OpenAPI 3.0 / Swagger specification
+│   │   └── 📄 postman_collection.json # Testable Postman collection JSON
 │   ├── 📄 package.json             # Frontend package configuration (Tailwind v4, Next 14)
 │   ├── 📄 tsconfig.json            # Frontend TypeScript configuration
 │   ├── 📄 next.config.mjs          # Next.js configuration
@@ -58,16 +59,14 @@
 │   │   ├── 📂 routes/api.ts        # REST router (/api/auth, /api/conversations, /api/messages, etc.)
 │   │   ├── 📂 socket/              # Real-time Socket.io rooms & event dispatchers
 │   │   └── 📄 server.ts            # Express HTTP + WebSocket server + MongoDB Atlas connection
-│   ├── 📄 .env                     # Port 5000, MongoDB Atlas URI, JWT Secret
+│   ├── 📄 .env.example             # Port 5000, MongoDB Atlas URI, JWT Secret template
 │   ├── 📄 package.json             # Backend dependencies & scripts
 │   └── 📄 tsconfig.json            # Backend TypeScript configuration
 │
-├── 📂 docs/                        # DOCUMENTATION DIRECTORY
-│   ├── 📄 API_DOCUMENTATION.md     # Standalone API documentation for all endpoints
-│   ├── 📄 THOUGHT_PROCESS.md       # In-depth architectural write-up and API analysis
-│   └── 📄 openapi.json             # Complete OpenAPI 3.0 / Swagger JSON specification
-│
 ├── 📄 API_DOCUMENTATION.md         # Top-level standalone API specification
+├── 📄 openapi.json                 # Complete OpenAPI 3.0 / Swagger JSON specification
+├── 📄 postman_collection.json      # Testable Postman API collection
+├── 📄 PROJECT_OVERVIEW_AND_ARCHITECTURE.md # Master project overview and architecture
 ├── 📄 THOUGHT_PROCESS.md           # Top-level architectural write-up & API quirks
 ├── 📄 README.md                    # Master setup & assignment guide
 ├── 📄 package.json                 # Root script runner (npm run dev, npm run build)

@@ -15,6 +15,7 @@ import {
   Layers,
   ArrowRight,
   Loader2,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -315,11 +316,22 @@ export default function DocsPage() {
             href="/openapi.json"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-xs font-semibold text-foreground transition-all"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-xs font-semibold text-foreground transition-all"
             title="Download OpenAPI / Swagger 3.0 JSON specification"
           >
             <Layers className="w-3.5 h-3.5 text-primary" />
-            <span>OpenAPI / Swagger JSON</span>
+            <span>OpenAPI 3.0</span>
+          </a>
+
+          <a
+            href="/postman_collection.json"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-xs font-semibold text-foreground transition-all"
+            title="Download Testable Postman / Bruno Collection"
+          >
+            <Download className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Postman Collection</span>
           </a>
 
           <Link
