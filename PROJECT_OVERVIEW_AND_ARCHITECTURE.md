@@ -15,7 +15,7 @@
 3. [Complete Folder Structure & File-by-File Guide](#3-complete-folder-structure--file-by-file-guide)
 4. [Core Features & What Was Built](#4-core-features--what-was-built)
 5. [Technical Implementation Deep-Dive](#5-technical-implementation-deep-dive)
-6. [Real-World Edge Cases, Backend Quirks & Permanent Fixes](#6-real-world-edge-cases-backend-quirks--permanent-fixes)
+6. [Real-World Edge Cases, Backend Quirks & Client-Side Fixes](#6-real-world-edge-cases-backend-quirks--client-side-fixes)
 7. [Technology Stack & Dependency Matrix](#7-technology-stack--dependency-matrix)
 8. [Local Development, Build & Deployment Guide](#8-local-development-build--deployment-guide)
 9. [Verification & Pre-Submission Audit Results](#9-verification--pre-submission-audit-results)
@@ -24,10 +24,10 @@
 
 ## 1. Executive Summary
 
-PulseChat is a full-stack, enterprise-grade, real-time messaging web application developed as a Frontend Take-Home Assignment. The project consists of three required deliverables:
+PulseChat is a modern, responsive, real-time messaging web application built with **Next.js 14 (App Router), TypeScript, Tailwind CSS, and Socket.io**, designed to interface with the live Render cloud backend API (`https://frontend-task-chatapp.onrender.com`). The project fulfills all three required deliverables:
 
 - **Part 1: Real-Time Chat Feature (`/chat`)**  
-  A modern, responsive messaging application supporting 1-to-1 direct messaging, group chat creation, real-time bidirectional synchronization via Socket.io, optimistic UI updates, smart upward/downward auto-scrolling, in-chat message search, dark/light theme switching, and synthesized audio cues.
+  A modern messaging application supporting 1-to-1 direct messaging, group chat creation, real-time bidirectional synchronization via Socket.io, optimistic UI updates, smart upward/downward auto-scrolling, in-chat message search, dark/light theme switching, and synthesized audio cues.
 - **Part 2: Creative Showcase Landing Page (`/`)**  
   A high-converting, aesthetic marketing landing page featuring an interactive **2-User Live Simulator** where visitors can switch between personas ("Alex" and "Taylor"), send simulated voice/text messages, observe live typing indicators, and test core chat features before signing in.
 - **Part 3: Thought Process, Architecture & API Documentation (`/docs`, `API_DOCUMENTATION.md`, `openapi.json`)**  
@@ -37,7 +37,7 @@ PulseChat is a full-stack, enterprise-grade, real-time messaging web application
 
 ## 2. High-Level Architecture & Data Flow
 
-PulseChat uses a **Dual-Channel Messaging Architecture** combining WebSocket events (Socket.io) with HTTP REST endpoints for maximum reliability, speed, and fallback resilience.
+PulseChat uses a **Dual-Channel Messaging Architecture** combining WebSocket events (Socket.io) with HTTP REST endpoints for maximum reliability, speed, and fallback resilience against the live Render backend.
 
 ```mermaid
 flowchart TB
@@ -47,10 +47,10 @@ flowchart TB
         Auth["AuthContext (JWT + LocalStorage)"]
         SoundEngine["Web Audio API Synthesizer"]
         SocketClient["Socket.io Client Service"]
-        RestClient["REST API Client (Axios/Fetch)"]
+        RestClient["REST API Client (ApiClient)"]
     end
 
-    subgraph Backend ["Live Backend Service (Render)"]
+    subgraph Backend ["Live Backend Service (Render - https://frontend-task-chatapp.onrender.com)"]
         RestRouter["Express Router (/api/*)"]
         SocketServer["Socket.io Gateway (Root /)"]
         AuthMiddleware["JWT Authentication Guard"]
@@ -93,18 +93,6 @@ flowchart TB
 
 ```
 home-assignment/
-├── backend/                       # Local backend reference & TypeScript server
-│   ├── src/
-│   │   ├── controllers/           # Auth, Conversation, Message controllers
-│   │   ├── middleware/            # JWT authentication middleware
-│   │   ├── models/                # Mongoose models (User, Conversation, Message)
-│   │   ├── routes/                # Express REST API routes (/api/*)
-│   │   ├── socket/                # Socket.io connection & event handlers
-│   │   └── server.ts              # Express app bootstrap & MongoDB connection
-│   ├── .env.example               # Backend environment variable template
-│   ├── package.json               # Backend dependencies (Express, Mongoose, Socket.io)
-│   └── tsconfig.json              # Backend TypeScript compiler configuration
-│
 ├── frontend/                      # Next.js 14 App Router Frontend
 │   ├── public/                    # Static public assets (openapi.json, postman_collection.json)
 │   ├── src/
@@ -163,7 +151,8 @@ home-assignment/
 ├── postman_collection.json        # Testable Postman / Bruno API test collection
 ├── README.md                      # Primary project README and quickstart guide
 ├── THOUGHT_PROCESS.md             # Thought process, design choices & AI transparency
-├── package.json                   # Root monorepo workspace scripts
+├── package.json                   # Root workspace script runner
+├── .env.example                   # Environment variable template
 └── .gitignore                     # Git ignore rules
 ```
 
@@ -223,9 +212,9 @@ Instead of bundling external `.mp3` or `.wav` files (which cause slow downloads 
 
 ---
 
-## 6. Real-World Edge Cases, Backend Quirks & Permanent Fixes
+## 6. Real-World Edge Cases, Backend Quirks & Client-Side Fixes
 
-During rigorous live testing against `https://frontend-task-chatapp.onrender.com`, several critical edge cases were discovered and permanently resolved:
+During rigorous live testing against `https://frontend-task-chatapp.onrender.com`, several critical edge cases were discovered and permanently resolved client-side:
 
 ### 6.1 The Socket Key Discrepancy (`id` vs `_id`) & Message Disappearance Bug
 - **The Bug:** When receiving messages over `socket.on("message:new")`, the Render backend emitted the object with `{ id: "..." }` instead of `{ _id: "..." }`.
@@ -289,50 +278,22 @@ During rigorous live testing against `https://frontend-task-chatapp.onrender.com
 - Node.js 18.18.0 or higher (e.g. Node.js 20 or 22)
 - npm 9.0.0 or higher
 
-### 8.2 Installation & Setup
+### 8.2 Installation & Quickstart
 
 ```bash
-# Clone the Repository:
+# 1. Clone the Repository:
 git clone https://github.com/dev-abib/home-assignment.git
 cd home-assignment
-```
 
-### 8.3 Startup Options
-
-#### Option A: Quickstart (Frontend with Live Render Cloud Backend — Recommended)
-*Pre-configured by default to connect directly to the live Render backend without requiring a local database.*
-
-```bash
-# 1. Install all dependencies
+# 2. Install all dependencies:
 npm run install:all
 
-# 2. Start Frontend Dev Server (Next.js at http://localhost:3000)
+# 3. Start Frontend Dev Server (Next.js at http://localhost:3000):
 npm run dev
 
-# 3. Validate Production Build & Linting
+# 4. Validate Production Build & Linting:
 npm run lint
 npm run build
-```
-
-#### Option B: Fullstack Local Server (Frontend + Local Express Backend)
-*If you wish to self-host and run the included Express.js + Socket.io + MongoDB Atlas server locally:*
-
-```bash
-# 1. Configure Backend Environment
-cp backend/.env.example backend/.env
-# Set your MONGODB_URI and JWT_SECRET in backend/.env
-
-# 2. Start Local Backend Server (Port 5000)
-npm run dev:backend
-# Accessible at http://localhost:5000 with health check at http://localhost:5000/health
-
-# 3. Point Frontend to Local Backend
-# In frontend/.env.local:
-# NEXT_PUBLIC_API_URL=http://localhost:5000/api
-# NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
-
-# 4. Start Frontend in Second Terminal
-npm run dev:frontend
 ```
 
 ---
@@ -343,13 +304,13 @@ npm run dev:frontend
 | :--- | :--- | :---: | :--- |
 | **ESLint Compliance** | `npm run lint` | **PASSED** | `✔ No ESLint warnings or errors` |
 | **TypeScript Compilation** | `npm run build` | **PASSED** | `✓ Compiled successfully (7/7 static routes)` |
-| **Security Sanitization** | Secret scan | **PASSED** | No hardcoded credentials; `.env.example` templates created |
+| **Security Sanitization** | Secret scan | **PASSED** | No hardcoded credentials; `.env.example` template provided |
 | **Empty & Whitespace Validation** | Automated test suite | **PASSED** | Blocked `""`, `"   "`, `"\t\n "` at UI and hook levels |
 | **Empty States (Fresh Account)** | Live user simulation | **PASSED** | Verified sidebar, chat area, and message list empty states |
 | **Error Handling & Retries** | Fault injection test | **PASSED** | Verified failed send retry buttons, load error screens, and reconnect banner |
 | **End-to-End Browser Flow** | Browser Automation Subagent | **PASSED** | Tested landing page, login, direct chat, group creation, group rename, and theme toggle |
 | **Multi-User Real-Time Sync** | Live socket simulator | **PASSED** | Verified bidirectional messaging and real-time synchronization between 2 concurrent users |
-| **Deployment Status** | Vercel + Render | **ACTIVE** | [https://home-assignment-smoky.vercel.app/](https://home-assignment-smoky.vercel.app/) |
+| **Deployment Status** | Vercel | **ACTIVE** | [https://home-assignment-smoky.vercel.app/](https://home-assignment-smoky.vercel.app/) |
 
 ---
 

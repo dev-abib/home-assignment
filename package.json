@@ -2,18 +2,12 @@
   "name": "pulse-chat-platform",
   "version": "1.0.0",
   "private": true,
-  "description": "Fullstack real-time chat platform with Next.js frontend, Express backend, and interactive API explorer.",
+  "description": "Real-time messaging platform built with Next.js 14, Tailwind CSS, Socket.io, and interactive API explorer.",
   "scripts": {
-    "install:all": "npm install --prefix frontend && npm install --prefix backend",
+    "install:all": "npm install --prefix frontend",
     "dev": "npm run dev --prefix frontend",
-    "dev:frontend": "npm run dev --prefix frontend",
-    "dev:backend": "npm run dev --prefix backend",
     "build": "npm run build --prefix frontend",
-    "build:frontend": "npm run build --prefix frontend",
-    "build:backend": "npm run build --prefix backend",
     "start": "npm run start --prefix frontend",
-    "start:backend": "npm run start --prefix backend",
-    "db:clean": "npm run db:clean --prefix backend",
     "lint": "npm run lint --prefix frontend"
   }
 }

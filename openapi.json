@@ -11,11 +11,7 @@
   "servers": [
     {
       "url": "https://frontend-task-chatapp.onrender.com",
-      "description": "Production Render Server"
-    },
-    {
-      "url": "http://localhost:5000",
-      "description": "Local Express + MongoDB Development Server"
+      "description": "Live Production Render Server"
     }
   ],
   "components": {
