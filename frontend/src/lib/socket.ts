@@ -45,8 +45,17 @@ class SocketService {
       this.updateStatus("disconnected");
     });
 
-    this.socket.on("message:new", (data: Message) => {
-      this.messageListeners.forEach((listener) => listener(data));
+    this.socket.on("message:new", (data: any) => {
+      const normalizedMsg: Message = {
+        ...data,
+        _id: String(data._id || data.id || `msg_${Date.now()}_${Math.random()}`),
+        createdAt:
+          typeof data.createdAt === "number"
+            ? new Date(data.createdAt).toISOString()
+            : String(data.createdAt || new Date().toISOString()),
+        status: "sent",
+      };
+      this.messageListeners.forEach((listener) => listener(normalizedMsg));
     });
 
     this.socket.on("conversation:updated", (data: Conversation) => {

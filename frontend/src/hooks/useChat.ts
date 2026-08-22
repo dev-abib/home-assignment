@@ -182,16 +182,25 @@ export function useChat({ currentUser }: UseChatProps) {
     const unsubStatus = socketService.onStatusChange(setSocketStatus);
 
     const unsubMessage = socketService.onMessage((incomingMsg: Message) => {
-      const isForActive = incomingMsg.conversation === activeConvRef.current;
-      const incomingSenderId = getSenderId(incomingMsg.sender);
+      const resolvedId = String(incomingMsg._id || incomingMsg.id || "");
+      const normalizedIncoming: Message = {
+        ...incomingMsg,
+        _id: resolvedId || `msg_${Date.now()}_${Math.random()}`,
+        status: "sent" as const,
+      };
+
+      const isForActive = normalizedIncoming.conversation === activeConvRef.current;
+      const incomingSenderId = getSenderId(normalizedIncoming.sender);
       const isFromSelf = !!currentUser?._id && incomingSenderId === currentUser._id;
 
       if (isForActive) {
         setMessages((prev) => {
-          // If this message is already rendered by _id, ignore or update status
-          const hasExactId = prev.some((m) => m._id === incomingMsg._id);
-          if (hasExactId) {
-            return prev.map((m) => (m._id === incomingMsg._id ? { ...incomingMsg, status: "sent" as const } : m));
+          // If this message is already rendered by exact valid _id, ignore or update status
+          if (normalizedIncoming._id) {
+            const hasExactId = prev.some((m) => !!m._id && m._id === normalizedIncoming._id);
+            if (hasExactId) {
+              return prev.map((m) => (m._id === normalizedIncoming._id ? { ...normalizedIncoming, status: "sent" as const } : m));
+            }
           }
 
           // If there is a pending optimistic message matching text and sender, replace the first pending one
@@ -202,11 +211,11 @@ export function useChat({ currentUser }: UseChatProps) {
               !replacedPending &&
               m.tempId &&
               m.status === "sending" &&
-              m.text === incomingMsg.text &&
+              m.text === normalizedIncoming.text &&
               (mSenderId === incomingSenderId || !mSenderId || mSenderId === currentUser?._id)
             ) {
               replacedPending = true;
-              return { ...incomingMsg, status: "sent" as const, tempId: m.tempId };
+              return { ...normalizedIncoming, status: "sent" as const, tempId: m.tempId };
             }
             return m;
           });
@@ -215,7 +224,7 @@ export function useChat({ currentUser }: UseChatProps) {
             return updated;
           }
 
-          return [...prev, incomingMsg];
+          return [...prev, normalizedIncoming];
         });
 
         if (!isFromSelf) {

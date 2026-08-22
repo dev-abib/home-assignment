@@ -8,6 +8,7 @@ export interface User {
 
 export interface Message {
   _id: string;
+  id?: string;
   conversation: string;
   sender: string | User | { _id: string; name?: string; phone?: string };
   text: string;
