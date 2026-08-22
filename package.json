@@ -4,6 +4,7 @@
   "private": true,
   "description": "Fullstack real-time chat platform with Next.js frontend, Express backend, and interactive API explorer.",
   "scripts": {
+    "install:all": "npm install --prefix frontend && npm install --prefix backend",
     "dev": "npm run dev --prefix frontend",
     "dev:frontend": "npm run dev --prefix frontend",
     "dev:backend": "npm run dev --prefix backend",

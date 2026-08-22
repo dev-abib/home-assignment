@@ -80,20 +80,46 @@
 ## 🚀 How to Run Locally
 
 ### Prerequisites
-- Node.js LTS (v20+)
-- npm (v10+)
+- Node.js 18.18.0 or higher (LTS v20+ recommended)
+- npm 9.0.0 or higher (v10+ recommended)
 
-### 1-Command Startup (From Root Directory)
+---
+
+### Option A: Quickstart (Frontend with Live Render Cloud Backend — Recommended)
+*No local database or backend setup required. The frontend is pre-configured to connect directly to the live Render backend.*
 
 ```bash
-# Install dependencies
-cd frontend && npm install && cd ..
+# 1. Install all dependencies from root
+npm run install:all
 
-# Start Frontend Dev Server (Next.js at http://localhost:3000)
+# 2. Start Frontend Dev Server (Next.js at http://localhost:3000)
 npm run dev
 
-# Build for production
+# 3. Build & Validate for Production
 npm run build
+```
+
+---
+
+### Option B: Running Fullstack Locally (Frontend + Local Express Backend)
+*If you want to run the complete stack including the local Express.js + Socket.io + MongoDB Atlas server:*
+
+```bash
+# 1. Configure Backend Environment
+cp backend/.env.example backend/.env
+# Edit backend/.env and set your MONGODB_URI and JWT_SECRET
+
+# 2. Start the Local Backend Server (Port 5000)
+npm run dev:backend
+# Server runs at http://localhost:5000 with health check at http://localhost:5000/health
+
+# 3. In a second terminal, configure Frontend to point locally:
+# In frontend/.env.local:
+# NEXT_PUBLIC_API_URL=http://localhost:5000/api
+# NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
+
+# 4. Start the Frontend Dev Server (Port 3000)
+npm run dev:frontend
 ```
 
 ---

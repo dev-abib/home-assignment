@@ -297,32 +297,42 @@ During rigorous live testing against `https://frontend-task-chatapp.onrender.com
    cd home-assignment
    ```
 
-2. **Install Dependencies:**
-   ```bash
-   npm run install:all
-   ```
+### 8.2 Startup Options
 
-3. **Configure Environment Variables:**
-   ```bash
-   # In frontend/.env.local (already configured for live Render backend)
-   NEXT_PUBLIC_API_URL=https://frontend-task-chatapp.onrender.com/api
-   NEXT_PUBLIC_SOCKET_URL=https://frontend-task-chatapp.onrender.com
-   ```
-
-4. **Start Development Server:**
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### 8.3 Production Build & Linting
+#### Option A: Quickstart (Frontend with Live Render Cloud Backend — Recommended)
+*Pre-configured by default to connect directly to the live Render backend without requiring a local database.*
 
 ```bash
-# Run ESLint validation
-npm run lint
+# 1. Install all dependencies
+npm run install:all
 
-# Run Next.js production build
+# 2. Start Frontend Dev Server (Next.js at http://localhost:3000)
+npm run dev
+
+# 3. Validate Production Build & Linting
+npm run lint
 npm run build
+```
+
+#### Option B: Fullstack Local Server (Frontend + Local Express Backend)
+*If you wish to self-host and run the included Express.js + Socket.io + MongoDB Atlas server locally:*
+
+```bash
+# 1. Configure Backend Environment
+cp backend/.env.example backend/.env
+# Set your MONGODB_URI and JWT_SECRET in backend/.env
+
+# 2. Start Local Backend Server (Port 5000)
+npm run dev:backend
+# Accessible at http://localhost:5000 with health check at http://localhost:5000/health
+
+# 3. Point Frontend to Local Backend
+# In frontend/.env.local:
+# NEXT_PUBLIC_API_URL=http://localhost:5000/api
+# NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
+
+# 4. Start Frontend in Second Terminal
+npm run dev:frontend
 ```
 
 ---
