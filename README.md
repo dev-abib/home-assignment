@@ -15,6 +15,7 @@
 | **Part 1 — Login / Auto-Register** | [**`https://home-assignment-smoky.vercel.app/login`**](https://home-assignment-smoky.vercel.app/login) | Phone + name auto-registration authentication |
 | **Part 1 — Interactive API Explorer** | [**`https://home-assignment-smoky.vercel.app/docs`**](https://home-assignment-smoky.vercel.app/docs) | In-app API test console with real server requests & cURL generator |
 | **Part 1 — OpenAPI 3.0 / Swagger JSON** | [**`https://home-assignment-smoky.vercel.app/openapi.json`**](https://home-assignment-smoky.vercel.app/openapi.json) | Downloadable standard OpenAPI 3.0 / Swagger JSON spec |
+| **Master Architecture Guide** | [`PROJECT_OVERVIEW_AND_ARCHITECTURE.md`](./PROJECT_OVERVIEW_AND_ARCHITECTURE.md) | **Deep-dive on what was built, how it was built, full folder guide & fixes** |
 | **Part 1 — Standalone API Docs** | [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md) | Formal specification of all REST & WebSocket endpoints |
 | **Part 3 — Thought Process Write-up** | [`THOUGHT_PROCESS.md`](./THOUGHT_PROCESS.md) | Architectural rationale, AI transparency, and live API quirks |
 | **Live Cloud Backend (Render)** | [`https://frontend-task-chatapp.onrender.com`](https://frontend-task-chatapp.onrender.com) | Express + Socket.io + MongoDB Atlas production server |
